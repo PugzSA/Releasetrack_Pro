@@ -1,0 +1,5 @@
+[2025-07-10T13:01:08.395Z] Starting email proxy server...
+[2025-07-10T13:01:08.397Z] Environment variables loaded: {"REACT_APP_RESEND_API_KEY":"✓ Present (masked)","REACT_APP_EMAIL_FROM":"onboarding@resend.dev"}
+[2025-07-10T13:01:08.412Z] Resend client initialized
+[2025-07-10T13:01:08.413Z] CORS middleware configured
+[2025-07-10T13:01:08.414Z] Body parser middleware configured

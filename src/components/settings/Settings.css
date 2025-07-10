@@ -1,0 +1,59 @@
+.settings-container {
+  padding: 20px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.page-subtitle {
+  color: var(--light-text);
+  margin-top: 5px;
+  font-size: 14px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 0;
+  color: var(--light-text);
+}
+
+.empty-state i {
+  font-size: 48px;
+  margin-bottom: 15px;
+  color: #ccc;
+}
+
+.empty-state p {
+  font-size: 16px;
+}
+
+.user-table {
+  margin-top: 10px;
+}
+
+.user-table th {
+  font-weight: 600;
+  color: var(--light-text);
+  border-top: none;
+}
+
+.user-table td {
+  vertical-align: middle;
+}
+
+.user-table button {
+  padding: 0;
+  background: none;
+  border: none;
+}
+
+.user-table button i {
+  font-size: 16px;
+}

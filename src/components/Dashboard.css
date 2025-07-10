@@ -1,0 +1,46 @@
+.dashboard-container {
+  padding: 10px;
+}
+
+.dashboard-sections {
+  margin-top: 30px;
+}
+
+.view-all {
+  font-size: 14px;
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.view-all:hover {
+  text-decoration: underline;
+}
+
+.release-item, .deployment-item {
+  padding: 15px;
+  border-radius: 6px;
+  background-color: #f9f9f9;
+  margin-bottom: 15px;
+  position: relative;
+}
+
+.release-item:last-child, .deployment-item:last-child {
+  margin-bottom: 0;
+}
+
+.release-details, .deployment-details {
+  font-size: 13px;
+  color: var(--light-text);
+  margin-top: 5px;
+}
+
+.release-details i, .deployment-details i {
+  margin-right: 5px;
+}
+
+.stat-subtitle {
+  font-size: 12px;
+  color: var(--light-text);
+  display: block;
+  margin-top: 2px;
+}

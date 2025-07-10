@@ -1,0 +1,64 @@
+.release-guidelines-container {
+  padding: 20px;
+}
+
+.release-guidelines-card {
+  transition: all 0.3s ease;
+  margin-bottom: 20px;
+}
+
+.release-guidelines-card.fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  margin: 0;
+  border-radius: 0;
+}
+
+.image-container {
+  width: 100%;
+  overflow: auto;
+  text-align: center;
+}
+
+.release-guidelines-image {
+  max-width: 100%;
+  height: auto;
+  display: inline-block;
+}
+
+.release-guidelines-card.fullscreen .image-container {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.9);
+}
+
+.release-guidelines-card.fullscreen .release-guidelines-image {
+  max-height: 95vh;
+  object-fit: contain;
+}
+
+.fullscreen-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.exit-fullscreen-btn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10000;
+  background-color: white;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  padding: 8px 15px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}

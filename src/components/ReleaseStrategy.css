@@ -1,0 +1,28 @@
+.release-strategy-container {
+  padding: 10px;
+}
+
+.approvers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.approver-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.approver-item span {
+  min-width: 120px;
+  font-size: 14px;
+}
+
+.card {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  font-weight: 500;
+}
