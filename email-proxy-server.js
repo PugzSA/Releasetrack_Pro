@@ -83,7 +83,7 @@ app.get('/api/health', (req, res) => {
     message: 'Email proxy server is running',
     timestamp: new Date().toISOString(),
     apiKeyConfigured: !!resendApiKey,
-    fromEmail: process.env.REACT_APP_EMAIL_FROM || 'onboarding@resend.dev'
+    fromEmail: process.env.REACT_APP_EMAIL_FROM || 'notifications@sfdctest.online'
   };
   
   logToFile('💚 Health check response:', healthData);
@@ -115,7 +115,7 @@ app.post('/api/send-email', async (req, res) => {
     
     // Construct email payload
     const emailPayload = {
-      from: req.body.from || process.env.REACT_APP_EMAIL_FROM || 'onboarding@resend.dev',
+      from: req.body.from || process.env.REACT_APP_EMAIL_FROM || 'notifications@sfdctest.online',
       to: req.body.to, // expects array of strings for multiple recipients
       subject: req.body.subject || 'Notification from ReleaseTrack Pro',
       html: req.body.html || '<p>This is a notification from ReleaseTrack Pro.</p>',
@@ -159,5 +159,5 @@ app.post('/api/send-email', async (req, res) => {
 app.listen(port, () => {
   console.log(`Email proxy server running at http://localhost:${port}`);
   console.log(`API Key available: ${!!resendApiKey}`);
-  console.log(`From email: ${process.env.REACT_APP_EMAIL_FROM || 'onboarding@resend.dev'}`);
+  console.log(`From email: ${process.env.REACT_APP_EMAIL_FROM || 'notifications@sfdctest.online'}`);
 });

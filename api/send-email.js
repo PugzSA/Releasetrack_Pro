@@ -19,8 +19,8 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: 'No recipients provided' });
     }
     
-    // Use the verified from email or fallback to onboarding domain
-    const fromEmail = from || 'onboarding@resend.dev';
+    // Use the verified from email or fallback to custom domain
+    const fromEmail = from || process.env.REACT_APP_EMAIL_FROM || 'notifications@sfdctest.online';
     
     console.log(`Sending email via Resend API:
       From: ${fromEmail}

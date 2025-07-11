@@ -22,6 +22,9 @@ const Tickets = () => {
     assignee: 'All Assignees'
   });
   
+  // State for sorting
+  const [sortOrder, setSortOrder] = useState('desc'); // 'asc' for ascending, 'desc' for descending
+  
   // State for unique requesters and assignees
   const [requesters, setRequesters] = useState([]);
   const [assignees, setAssignees] = useState([]);
@@ -65,6 +68,11 @@ const Tickets = () => {
       ...prev,
       [name]: value
     }));
+  };
+  
+  // Toggle sort order between ascending and descending
+  const toggleSortOrder = () => {
+    setSortOrder(prevOrder => prevOrder === 'asc' ? 'desc' : 'asc');
   };
   
   // Helper function to get release name from release_id
@@ -116,9 +124,10 @@ const Tickets = () => {
     }
   }, [contextTickets]);
 
-  // Apply filters to tickets
+  // Apply filters to tickets and sort by creation date
   const applyFilters = (tickets) => {
-    return tickets.filter(ticket => {
+    // First, filter the tickets
+    const filteredTickets = tickets.filter(ticket => {
       // Status filter
       if (filters.status !== 'All Status' && ticket.status !== filters.status) {
         return false;
@@ -164,6 +173,20 @@ const Tickets = () => {
       }
       
       return true;
+    });
+    
+    // Then, sort the filtered tickets by creation date
+    return filteredTickets.sort((a, b) => {
+      // Get the date from either created_at (from database) or date (from local tickets)
+      const dateA = a.created_at ? new Date(a.created_at) : new Date(a.date);
+      const dateB = b.created_at ? new Date(b.created_at) : new Date(b.date);
+      
+      // Sort based on the current sort order
+      if (sortOrder === 'asc') {
+        return dateA - dateB; // Ascending: oldest first
+      } else {
+        return dateB - dateA; // Descending: newest first
+      }
     });
   };
 
@@ -305,6 +328,15 @@ const Tickets = () => {
               <div className="filter-actions">
                 <Button 
                   variant="outline-secondary" 
+                  className="sort-btn me-2" 
+                  onClick={toggleSortOrder}
+                  title={sortOrder === 'asc' ? 'Sort by date (oldest first)' : 'Sort by date (newest first)'}
+                >
+                  <i className={`bi bi-sort-${sortOrder === 'asc' ? 'up' : 'down'} me-1`}></i>
+                  <span>Sort by Date {sortOrder === 'asc' ? '(Oldest First)' : '(Newest First)'}</span>
+                </Button>
+                <Button 
+                  variant="outline-secondary" 
                   className="reset-filters-btn" 
                   onClick={() => setFilters({
                     status: 'All Status',
@@ -377,7 +409,7 @@ const Tickets = () => {
                       )}
 
                       <div className="ticket-actions">
-                        <span className={`status-badge ${(ticket.status?.toLowerCase() || 'open').replace(/\s+/g, '-')}`}>{ticket.status || 'Open'}</span>
+                        <span className={`status-badge ${(ticket.status?.toLowerCase() || 'backlog').replace(/\s+/g, '-')}`}>{ticket.status || 'Backlog'}</span>
                         <div className="action-buttons">
                           <button 
                             className="btn btn-link"
@@ -470,7 +502,7 @@ const Tickets = () => {
                       )}
 
                       <div className="ticket-actions">
-                        <span className={`status-badge ${(ticket.status?.toLowerCase() || 'open').replace(/\s+/g, '-')}`}>{ticket.status || 'Open'}</span>
+                        <span className={`status-badge ${(ticket.status?.toLowerCase() || 'backlog').replace(/\s+/g, '-')}`}>{ticket.status || 'Backlog'}</span>
                         <div className="action-buttons">
                           <button 
                             className="btn btn-link"
@@ -625,7 +657,7 @@ const Tickets = () => {
                         )}
 
                         <div className="ticket-actions">
-                          <span className={`status-badge ${(ticket.status?.toLowerCase() || 'open').replace(/\s+/g, '-')}`}>{ticket.status || 'Open'}</span>
+                          <span className={`status-badge ${(ticket.status?.toLowerCase() || 'backlog').replace(/\s+/g, '-')}`}>{ticket.status || 'Backlog'}</span>
                           <div className="action-buttons">
                             <button 
                               className="btn btn-link"
@@ -695,3 +727,6 @@ const Tickets = () => {
 };
 
 export default Tickets;
+
+
+

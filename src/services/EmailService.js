@@ -46,8 +46,8 @@ class EmailService {
       this.apiKey = process.env.REACT_APP_RESEND_API_KEY;
       console.log('DEBUG: API Key available:', !!this.apiKey);
       
-      // Using Resend's onboarding domain which is pre-verified
-      this.fromEmail = process.env.REACT_APP_EMAIL_FROM || 'onboarding@resend.dev';
+      // Using custom domain for email notifications
+      this.fromEmail = process.env.REACT_APP_EMAIL_FROM || 'notifications@sfdctest.online';
       this.supabase = null; // Will be set when AppContext initializes
       
       // We'll initialize Resend SDK on demand to avoid browser compatibility issues

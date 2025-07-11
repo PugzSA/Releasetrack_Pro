@@ -28,10 +28,25 @@
   align-items: center;
   justify-content: flex-end;
   flex: 1;
+  gap: 10px;
 }
 
-.reset-filters-btn {
+.reset-filters-btn,
+.sort-btn {
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+}
+
+/* Make the sort button responsive */
+@media (max-width: 768px) {
+  .sort-btn span {
+    display: none;
+  }
+  
+  .sort-btn i {
+    margin-right: 0 !important;
+  }
 }
 
 .tickets-list {

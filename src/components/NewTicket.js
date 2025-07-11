@@ -6,20 +6,15 @@ import './NewRelease.css'; // Reuse the same CSS
 
 const NewTicket = () => {
   const navigate = useNavigate();
-  const { addTicket, releases, lastTicketNumber, supabase } = useAppContext();
+  const { addTicket, releases, supabase } = useAppContext();
   const [users, setUsers] = useState([]);
-  
-  // Next ticket number will be lastTicketNumber + 1
-  const nextNumber = lastTicketNumber + 1;
-  const paddedNumber = String(nextNumber).padStart(5, '0');
-  const nextTicketId = `SUP-${paddedNumber}`;
   
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     type: 'Issue',
     priority: 'Medium',
-    status: 'Open',
+    status: 'Backlog',
     supportArea: 'CRM',
     assignee: '',
     assignee_id: null,
@@ -64,12 +59,14 @@ const NewTicket = () => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccess(false);
     
     try {
       // Format the data for submission
+      // Note: The ticket ID will be generated server-side in the addTicket function
       const formattedData = {
         ...formData,
-        // Convert string IDs to numbers
+        created_at: new Date().toISOString(),
         release_id: formData.release_id ? parseInt(formData.release_id) : null,
         assignee_id: formData.assignee_id ? parseInt(formData.assignee_id) : null,
         requester_id: formData.requester_id ? parseInt(formData.requester_id) : null
@@ -97,7 +94,11 @@ const NewTicket = () => {
         formattedData.requester = '';
       }
       
+      // Call addTicket which will update lastTicketNumber in the context
       const newTicket = await addTicket(formattedData);
+      console.log(`Ticket created successfully with ID: ${newTicket.id}`);
+      console.log(`lastTicketNumber should now be updated to: ${parseInt(newTicket.id.match(/SUP-(\d+)/)[1], 10)}`);
+      
       setSuccess(true);
       
       // Reset form after successful submission
@@ -116,10 +117,11 @@ const NewTicket = () => {
         testNotes: ''
       });
       
-      // Redirect after short delay to show success message
-      setTimeout(() => {
-        navigate('/tickets');
-      }, 1500);
+      // Force the component to re-render with the updated lastTicketNumber
+      // by navigating away and back
+      navigate('/tickets');
+      
+      // No need for a timeout since we're navigating away immediately
       
     } catch (err) {
       console.error('Error creating ticket:', err);
@@ -160,7 +162,7 @@ const NewTicket = () => {
                   <Form.Control
                     type="text"
                     name="id"
-                    value={nextTicketId}
+                    value="Will be generated on submission"
                     readOnly
                     disabled
                     className="bg-light"

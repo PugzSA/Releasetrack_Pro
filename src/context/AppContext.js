@@ -65,7 +65,8 @@ export const AppProvider = ({ children }) => {
     }
   }, []);
 
-  const [lastTicketNumber, setLastTicketNumber] = useState(3); // Start with 3 so next ticket will be SUP-00004
+  // Initialize with 10 based on user's information that the last ticket is SUP-00010
+  const [lastTicketNumber, setLastTicketNumber] = useState(10);
 
   // Fetch initial data
   useEffect(() => {
@@ -83,18 +84,87 @@ export const AppProvider = ({ children }) => {
         
         // Find the highest ticket number to ensure we continue the sequence
         if (ticketsData && ticketsData.length > 0) {
-          const ticketNumbers = ticketsData
-            .map(ticket => {
-              // Extract the numeric part from ticket IDs like SUP-00001
-              const match = ticket.id.match(/SUP-(\d+)/);
-              return match ? parseInt(match[1], 10) : 0;
-            })
-            .filter(num => !isNaN(num));
+          console.log(`Found ${ticketsData.length} tickets in the database`);
           
-          if (ticketNumbers.length > 0) {
-            const highestNumber = Math.max(...ticketNumbers);
+          // Log all ticket IDs for debugging
+          console.log('All ticket IDs:', ticketsData.map(t => t.id));
+          
+          // Check if we have the specific ticket ID mentioned by the user
+          const hasSUP10 = ticketsData.some(t => t.id === 'SUP-00010');
+          console.log(`Database contains SUP-00010: ${hasSUP10}`);
+          
+          // Manually find the highest ticket number for debugging
+          let manualHighest = 0;
+          let manualHighestId = null;
+          
+          ticketsData.forEach(ticket => {
+            console.log(`Processing ticket: ${JSON.stringify(ticket)}`);
+            if (ticket && ticket.id) {
+              console.log(`  Ticket ID: ${ticket.id}`);
+              const match = ticket.id.match(/SUP-(\d+)/);
+              if (match) {
+                const num = parseInt(match[1], 10);
+                console.log(`  Parsed number: ${num}`);
+                if (!isNaN(num) && num > manualHighest) {
+                  manualHighest = num;
+                  manualHighestId = ticket.id;
+                }
+              } else {
+                console.log(`  No match for ticket ID: ${ticket.id}`);
+              }
+            } else {
+              console.log(`  Invalid ticket: ${ticket}`);
+            }
+          });
+          
+          console.log(`Manual highest ticket: ${manualHighestId} (${manualHighest})`);
+          
+          // Now proceed with the sorting approach
+          const sortedTickets = [...ticketsData].sort((a, b) => {
+            // Extract numeric parts from ticket IDs (e.g., 00001 from SUP-00001)
+            const aMatch = a.id?.match(/SUP-(\d+)/);
+            const bMatch = b.id?.match(/SUP-(\d+)/);
+            
+            // Log the matches for debugging
+            console.log(`Comparing: ${a.id} vs ${b.id}`);
+            console.log(`  Match for ${a.id}: ${aMatch ? aMatch[1] : 'no match'}`);
+            console.log(`  Match for ${b.id}: ${bMatch ? bMatch[1] : 'no match'}`);
+            
+            // If either doesn't match the pattern, put it at the end
+            if (!aMatch) return 1;
+            if (!bMatch) return -1;
+            
+            // Compare the numeric values
+            const aNum = parseInt(aMatch[1], 10);
+            const bNum = parseInt(bMatch[1], 10);
+            
+            console.log(`  Parsed numbers: ${aNum} vs ${bNum}`);
+            
+            // Sort in descending order (highest first)
+            return bNum - aNum;
+          });
+          
+          // Get the highest ticket ID (first after sorting)
+          const highestTicket = sortedTickets[0];
+          console.log(`Highest ticket ID after sorting: ${highestTicket.id}`);
+          
+          // Extract the number from the highest ticket ID
+          const match = highestTicket.id.match(/SUP-(\d+)/);
+          if (match) {
+            const highestNumber = parseInt(match[1], 10);
+            console.log(`Setting lastTicketNumber to: ${highestNumber} (type: ${typeof highestNumber})`);
             setLastTicketNumber(highestNumber);
+          } else {
+            console.warn(`Could not parse ticket number from highest ticket ID: ${highestTicket.id}`);
+            // Keep the default value
           }
+          
+          // Verify the lastTicketNumber value after setting
+          setTimeout(() => {
+            console.log(`Verification - lastTicketNumber is now: ${lastTicketNumber} (type: ${typeof lastTicketNumber})`);
+          }, 0);
+        } else {
+          console.log('No tickets found in the database, using default ticket number');
         }
         
         // Fetch metadata items
@@ -151,20 +221,77 @@ export const AppProvider = ({ children }) => {
   // Ticket CRUD operations
   const addTicket = async (ticketData) => {
     try {
+      console.log('=== ADDING NEW TICKET ===');
+      
+      // IMPORTANT: Fetch the latest tickets from the database to ensure we have the most up-to-date information
+      console.log('Fetching latest tickets from database to ensure unique ID generation');
+      const latestTickets = await service.getTickets();
+      
+      // Find the highest ticket number from the database
+      let highestNumber = 0;
+      
+      if (latestTickets && latestTickets.length > 0) {
+        console.log(`Found ${latestTickets.length} tickets in the database`);
+        
+        // Sort tickets by ID in descending order
+        const sortedTickets = [...latestTickets].sort((a, b) => {
+          const aMatch = a.id?.match(/SUP-(\d+)/);
+          const bMatch = b.id?.match(/SUP-(\d+)/);
+          
+          if (!aMatch) return 1;
+          if (!bMatch) return -1;
+          
+          const aNum = parseInt(aMatch[1], 10);
+          const bNum = parseInt(bMatch[1], 10);
+          
+          return bNum - aNum;
+        });
+        
+        // Get the highest ticket ID
+        const highestTicket = sortedTickets[0];
+        console.log(`Highest ticket ID in database: ${highestTicket.id}`);
+        
+        // Extract the number from the highest ticket ID
+        const match = highestTicket.id.match(/SUP-(\d+)/);
+        if (match) {
+          highestNumber = parseInt(match[1], 10);
+          console.log(`Highest ticket number from database: ${highestNumber}`);
+        }
+      } else {
+        console.log('No tickets found in the database, using default ticket number');
+      }
+      
+      // Use the higher of lastTicketNumber from state or highestNumber from database
+      const baseNumber = Math.max(
+        (typeof lastTicketNumber === 'number' && !isNaN(lastTicketNumber)) ? lastTicketNumber : 0,
+        highestNumber
+      );
+      
+      console.log(`Using base number for new ticket: ${baseNumber} (from lastTicketNumber: ${lastTicketNumber}, highestNumber: ${highestNumber})`);
+      
       // Generate the next ticket number
-      const nextNumber = lastTicketNumber + 1;
+      const nextNumber = baseNumber + 1;
       const paddedNumber = String(nextNumber).padStart(5, '0');
       const ticketId = `SUP-${paddedNumber}`;
       
-      // Override any provided ID with our auto-generated one
+      console.log(`Generated new ticket ID: ${ticketId}`);
+      
+      // Create the ticket with the ID
       const ticketWithId = {
         ...ticketData,
         id: ticketId
       };
       
+      // Create the ticket and update state
       const newTicket = await service.createTicket(ticketWithId);
-      setTickets([...tickets, newTicket]);
-      setLastTicketNumber(nextNumber); // Update the last ticket number
+      
+      // Update the tickets array with all the latest tickets plus our new one
+      setTickets([...latestTickets, newTicket]);
+      
+      // IMPORTANT: Update the lastTicketNumber state
+      console.log(`Updating lastTicketNumber from ${lastTicketNumber} to ${nextNumber}`);
+      setLastTicketNumber(nextNumber);
+      
       return newTicket;
     } catch (err) {
       setError('Failed to create ticket');

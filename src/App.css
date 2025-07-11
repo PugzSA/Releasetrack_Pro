@@ -138,24 +138,24 @@ body {
   color: #1976d2;
 }
 
-.status-badge.blocked-user {
-  background-color: #ffebee;
-  color: #e53935;
+.status-badge.blocked---user {
+  background-color: #f44336;
+  color: white;
 }
 
-.status-badge.blocked-dev {
-  background-color: #fce4ec;
-  color: #d81b60;
+.status-badge.blocked---dev {
+  background-color: #f44336;
+  color: white;
 }
 
-.status-badge.in-testing-dev {
-  background-color: #fff9c4;
-  color: #fbc02d;
+.status-badge.in-testing---dev {
+  background-color: #ff9800;
+  color: white;
 }
 
-.status-badge.in-testing-uat {
-  background-color: #fff8e1;
-  color: #ffb300;
+.status-badge.in-testing---uat {
+  background-color: #ff9800;
+  color: white;
 }
 
 .status-badge.ready-for-release {
