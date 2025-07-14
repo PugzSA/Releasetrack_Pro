@@ -3,7 +3,7 @@ import { Modal, Button, Form, Row, Col, Alert } from 'react-bootstrap';
 import { useAppContext } from '../../context/AppContext';
 import NotificationToast from '../common/NotificationToast';
 
-const EditTicketModal = ({ show, handleClose, ticket }) => {
+const EditTicketModal = ({ show, handleClose, ticket, onTicketUpdate }) => {
   const { updateTicket, releases, supabase } = useAppContext();
   const [users, setUsers] = useState([]);
   
@@ -117,6 +117,11 @@ const EditTicketModal = ({ show, handleClose, ticket }) => {
       
       const updatedTicket = await updateTicket(ticket.id, formattedData);
       setSuccess(true);
+      
+      // Call the onTicketUpdate callback if provided
+      if (onTicketUpdate && typeof onTicketUpdate === 'function') {
+        onTicketUpdate({...ticket, ...formattedData});
+      }
       
       // Track if any notifications were sent
       let notificationSent = false;

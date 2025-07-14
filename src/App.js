@@ -12,6 +12,8 @@ import EditRelease from './components/EditRelease';
 import Tickets from './components/tickets/Tickets';
 import NewTicket from './components/NewTicket';
 import Metadata from './components/metadata/Metadata';
+import NewMetadata from './components/NewMetadata';
+import EditMetadata from './components/EditMetadata';
 import Reports from './components/Reports';
 import ReleaseStrategy from './components/ReleaseStrategy';
 import ReleaseDates from './components/ReleaseDates';
@@ -32,6 +34,8 @@ function App() {
           <Route path="/tickets" element={<Tickets />} />
           <Route path="/tickets/new" element={<NewTicket />} />
           <Route path="/metadata" element={<Metadata />} />
+          <Route path="/metadata/new" element={<NewMetadata />} />
+          <Route path="/metadata/edit/:id" element={<EditMetadata />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/release-strategy" element={<ReleaseStrategy />} />
           <Route path="/release-dates" element={<ReleaseDates />} />

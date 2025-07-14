@@ -16,6 +16,7 @@ export const AppProvider = ({ children }) => {
   const [releases, setReleases] = useState([]);
   const [tickets, setTickets] = useState([]);
   const [metadataItems, setMetadataItems] = useState([]);
+  const [savedFilters, setSavedFilters] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   
@@ -81,6 +82,15 @@ export const AppProvider = ({ children }) => {
         // Fetch tickets
         const ticketsData = await service.getTickets();
         setTickets(ticketsData);
+        
+        // Fetch saved filters
+        try {
+          const savedFiltersData = await service.getSavedFilters();
+          setSavedFilters(savedFiltersData);
+        } catch (filterError) {
+          console.error('Error fetching saved filters:', filterError);
+          // Don't fail the entire data load if saved filters fail
+        }
         
         // Find the highest ticket number to ensure we continue the sequence
         if (ticketsData && ticketsData.length > 0) {
@@ -645,6 +655,53 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  // Saved Filters CRUD operations
+  const getSavedFilters = async (filter_type) => {
+    try {
+      const filters = await service.getSavedFilters(filter_type);
+      setSavedFilters(filters);
+      return filters;
+    } catch (err) {
+      setError('Failed to fetch saved filters');
+      throw err;
+    }
+  };
+
+  const addSavedFilter = async (filterData) => {
+    try {
+      const newFilter = await service.createSavedFilter(filterData);
+      setSavedFilters([...savedFilters, newFilter]);
+      return newFilter;
+    } catch (err) {
+      setError('Failed to save filter');
+      throw err;
+    }
+  };
+
+  const updateSavedFilter = async (id, filterData) => {
+    try {
+      const updatedFilter = await service.updateSavedFilter(id, filterData);
+      setSavedFilters(savedFilters.map(filter => 
+        filter.id === parseInt(id) ? updatedFilter : filter
+      ));
+      return updatedFilter;
+    } catch (err) {
+      setError('Failed to update saved filter');
+      throw err;
+    }
+  };
+
+  const deleteSavedFilter = async (id) => {
+    try {
+      await service.deleteSavedFilter(id);
+      setSavedFilters(savedFilters.filter(filter => filter.id !== parseInt(id)));
+      return true;
+    } catch (err) {
+      setError('Failed to delete saved filter');
+      throw err;
+    }
+  };
+
   // Clear any error messages
   const clearError = () => {
     setError(null);
@@ -656,6 +713,7 @@ export const AppProvider = ({ children }) => {
         releases,
         tickets,
         metadataItems,
+        savedFilters,
         loading,
         error,
         addRelease,
@@ -667,6 +725,10 @@ export const AppProvider = ({ children }) => {
         addMetadataItem,
         updateMetadataItem,
         deleteMetadataItem,
+        getSavedFilters,
+        addSavedFilter,
+        updateSavedFilter,
+        deleteSavedFilter,
         clearError,
         supabase,
         emailService

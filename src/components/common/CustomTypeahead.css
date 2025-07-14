@@ -1,0 +1,114 @@
+.custom-typeahead-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.search-icon-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.custom-typeahead-wrapper .rbt {
+  width: 100%;
+}
+
+.custom-typeahead-wrapper .rbt-input-main {
+  padding-right: 30px !important;
+  padding-left: 30px !important;
+}
+
+/* Hide the default rbt-close button from react-bootstrap-typeahead */
+.custom-typeahead-wrapper .rbt-close {
+  display: none !important;
+}
+
+/* Custom clear button styling */
+.custom-clear-button {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  background: transparent;
+  border: none;
+  color: #6c757d;
+  font-size: 1.25rem;
+  line-height: 1;
+  padding: 0;
+  margin: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.custom-clear-button:hover {
+  color: #495057;
+}
+
+/* Hide browser's native clear button - more aggressive approach */
+.custom-typeahead-wrapper input::-webkit-search-cancel-button,
+.custom-typeahead-wrapper input::-webkit-search-decoration,
+.custom-typeahead-wrapper input::-webkit-search-results-button,
+.custom-typeahead-wrapper input::-webkit-search-results-decoration,
+.custom-typeahead-wrapper input::-ms-clear,
+.rbt-input-main::-webkit-search-cancel-button,
+.rbt-input-main::-webkit-search-decoration,
+.rbt-input-main::-webkit-search-results-button,
+.rbt-input-main::-webkit-search-results-decoration,
+.rbt-input-main::-ms-clear {
+  display: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Force input type to behave like text, not search */
+.custom-typeahead-wrapper input,
+.rbt-input-main {
+  -webkit-appearance: textfield !important;
+  appearance: textfield !important;
+}
+
+/* Style for selected items */
+.custom-typeahead-wrapper .rbt-token {
+  background-color: #e9ecef;
+  border: 1px solid #ced4da;
+  color: #495057;
+  padding: 0.25rem 0.5rem;
+  margin-right: 0.25rem;
+  border-radius: 0.25rem;
+}
+
+/* Style for dropdown menu */
+.custom-typeahead-wrapper .rbt-menu {
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 0.5rem 0;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+.custom-typeahead-wrapper .dropdown-item {
+  padding: 0.5rem 1rem;
+  white-space: normal;
+}
+
+/* Style for ticket ID */
+.custom-typeahead-wrapper .ticket-id {
+  font-weight: bold;
+  color: var(--primary-color);
+}

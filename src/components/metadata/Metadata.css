@@ -334,6 +334,44 @@
   border-radius: 0.25rem;
 }
 
+/* Saved filters dropdown styling */
+.saved-filters-dropdown .dropdown-toggle {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.saved-filters-dropdown .dropdown-menu {
+  min-width: 250px;
+}
+
+.saved-filters-dropdown .dropdown-item {
+  padding: 0.5rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.saved-filters-dropdown .dropdown-item span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.saved-filters-dropdown .dropdown-item .btn-link {
+  padding: 0;
+  margin-left: 10px;
+  font-size: 0.875rem;
+}
+
+.saved-filters-dropdown .dropdown-item:active .btn-link {
+  color: #fff;
+}
+
 /* Style for ticket ID in typeahead dropdown */
 .ticket-id {
   font-weight: bold;

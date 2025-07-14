@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Form, Modal, InputGroup } from 'react-bootstrap';
+import { Button, Form, Modal, InputGroup, Dropdown } from 'react-bootstrap';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
 import CustomTypeahead from '../common/CustomTypeahead';
@@ -7,7 +7,17 @@ import './Metadata.css';
 
 const Metadata = () => {
   const navigate = useNavigate();
-  const { metadataItems, deleteMetadataItem, releases, tickets } = useAppContext();
+  const { 
+    metadataItems, 
+    deleteMetadataItem, 
+    releases, 
+    tickets, 
+    savedFilters, 
+    addSavedFilter,
+    updateSavedFilter,
+    deleteSavedFilter,
+    getSavedFilters 
+  } = useAppContext();
   
   // Helper function to get ticket information from ticket_id
   const getTicketInfo = (ticketId) => {
@@ -44,6 +54,13 @@ const Metadata = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState(null);
   
+  // State for save filter modal
+  const [showSaveFilterModal, setShowSaveFilterModal] = useState(false);
+  const [filterName, setFilterName] = useState('');
+  const [saveFilterLoading, setSaveFilterLoading] = useState(false);
+  const [saveFilterError, setSaveFilterError] = useState(null);
+  const [selectedSavedFilter, setSelectedSavedFilter] = useState(null);
+  
   // Format tickets for the typeahead component
   const ticketOptions = tickets
     .sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date))
@@ -65,6 +82,12 @@ const Metadata = () => {
   
   // Get unique metadata actions for the action filter dropdown
   const metadataActions = ['all', ...new Set(metadataItems.map(item => item.action))];
+  
+  // Fetch metadata-specific saved filters when component mounts
+  useEffect(() => {
+    // Fetch only metadata-specific saved filters
+    getSavedFilters('metadata');
+  }, []);
   
   // Apply filters to metadata items
   useEffect(() => {
@@ -128,11 +151,75 @@ const Metadata = () => {
     setActionFilter('all');
     setSelectedTicket([]);
     setSelectedRelease([]);
+    setSelectedSavedFilter(null);
   };
   
   // Toggle sort order between ascending and descending
   const toggleSortOrder = () => {
     setSortOrder(prevOrder => prevOrder === 'asc' ? 'desc' : 'asc');
+  };
+  
+  // Save current filter settings
+  const handleSaveFilter = async () => {
+    if (!filterName.trim()) {
+      setSaveFilterError('Please enter a filter name');
+      return;
+    }
+    
+    setSaveFilterLoading(true);
+    setSaveFilterError(null);
+    
+    try {
+      const filterData = {
+        name: filterName.trim(),
+        filter_criteria: JSON.stringify({
+          nameFilter,
+          typeFilter,
+          actionFilter,
+          selectedTicket: selectedTicket.length > 0 ? selectedTicket[0] : null,
+          selectedRelease: selectedRelease.length > 0 ? selectedRelease[0] : null,
+          sortOrder
+        })
+      };
+      
+      await addSavedFilter(filterData);
+      setShowSaveFilterModal(false);
+      setFilterName('');
+    } catch (err) {
+      console.error('Error saving filter:', err);
+      setSaveFilterError(err.message || 'Failed to save filter. Please try again.');
+    } finally {
+      setSaveFilterLoading(false);
+    }
+  };
+  
+  // Apply a saved filter
+  const applyFilter = (filter) => {
+    try {
+      const criteria = JSON.parse(filter.filter_criteria);
+      
+      setNameFilter(criteria.nameFilter || '');
+      setTypeFilter(criteria.typeFilter || 'all');
+      setActionFilter(criteria.actionFilter || 'all');
+      setSelectedTicket(criteria.selectedTicket ? [criteria.selectedTicket] : []);
+      setSelectedRelease(criteria.selectedRelease ? [criteria.selectedRelease] : []);
+      setSortOrder(criteria.sortOrder || 'desc');
+      setSelectedSavedFilter(filter);
+    } catch (err) {
+      console.error('Error applying filter:', err);
+    }
+  };
+  
+  // Delete a saved filter
+  const handleDeleteFilter = async (filterId) => {
+    try {
+      await deleteSavedFilter(filterId);
+      if (selectedSavedFilter && selectedSavedFilter.id === filterId) {
+        setSelectedSavedFilter(null);
+      }
+    } catch (err) {
+      console.error('Error deleting filter:', err);
+    }
   };
   
   // Handle delete confirmation
@@ -286,9 +373,50 @@ const Metadata = () => {
         <div className="card mb-4">
           <div className="card-body" style={{ borderBottom: 'none' }}>
             <div className="metadata-filters">
-              <div className="d-flex align-items-center mb-2">
-                <i className="bi bi-funnel me-2"></i>
-                <span>Filters:</span>
+              <div className="d-flex align-items-center justify-content-between mb-2">
+                <div className="d-flex align-items-center">
+                  <i className="bi bi-funnel me-2"></i>
+                  <span>Filters:</span>
+                </div>
+                
+                <div className="saved-filters-dropdown">
+                  <Dropdown>
+                    <Dropdown.Toggle variant="outline-secondary" id="saved-filters-dropdown">
+                      <i className="bi bi-bookmark me-1"></i>
+                      {selectedSavedFilter ? selectedSavedFilter.name : 'Saved Filters'}
+                    </Dropdown.Toggle>
+                    <Dropdown.Menu>
+                      <Dropdown.Header>Select a saved filter</Dropdown.Header>
+                      {savedFilters && savedFilters.length > 0 ? (
+                        savedFilters.map(filter => (
+                          <Dropdown.Item 
+                            key={filter.id} 
+                            onClick={() => applyFilter(filter)}
+                            className="d-flex justify-content-between align-items-center"
+                          >
+                            <span>{filter.name}</span>
+                            <Button 
+                              variant="link" 
+                              className="p-0 ms-2 text-danger" 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteFilter(filter.id);
+                              }}
+                            >
+                              <i className="bi bi-trash"></i>
+                            </Button>
+                          </Dropdown.Item>
+                        ))
+                      ) : (
+                        <Dropdown.Item disabled>No saved filters</Dropdown.Item>
+                      )}
+                      <Dropdown.Divider />
+                      <Dropdown.Item onClick={() => setShowSaveFilterModal(true)}>
+                        <i className="bi bi-plus-circle me-1"></i> Save Current Filter
+                      </Dropdown.Item>
+                    </Dropdown.Menu>
+                  </Dropdown>
+                </div>
               </div>
               
               <div className="filter-options">
@@ -417,12 +545,9 @@ const Metadata = () => {
           <Modal.Title>Confirm Delete</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {deleteError && (
-            <div className="alert alert-danger">{deleteError}</div>
-          )}
-          <p>Are you sure you want to delete this metadata item?</p>
-          <p><strong>{itemToDelete?.name}</strong></p>
-          <p>This action cannot be undone.</p>
+          Are you sure you want to delete the metadata item <strong>{itemToDelete?.name}</strong>?
+          This action cannot be undone.
+          {deleteError && <div className="alert alert-danger mt-3">{deleteError}</div>}
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowDeleteModal(false)} disabled={deleteLoading}>
@@ -430,6 +555,33 @@ const Metadata = () => {
           </Button>
           <Button variant="danger" onClick={handleDeleteConfirm} disabled={deleteLoading}>
             {deleteLoading ? 'Deleting...' : 'Delete'}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      
+      {/* Save filter modal */}
+      <Modal show={showSaveFilterModal} onHide={() => setShowSaveFilterModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Save Filter</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form.Group>
+            <Form.Label>Filter Name</Form.Label>
+            <Form.Control
+              type="text"
+              placeholder="Enter a name for this filter"
+              value={filterName}
+              onChange={(e) => setFilterName(e.target.value)}
+            />
+          </Form.Group>
+          {saveFilterError && <div className="alert alert-danger mt-3">{saveFilterError}</div>}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowSaveFilterModal(false)} disabled={saveFilterLoading}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleSaveFilter} disabled={saveFilterLoading || !filterName.trim()}>
+            {saveFilterLoading ? 'Saving...' : 'Save Filter'}
           </Button>
         </Modal.Footer>
       </Modal>

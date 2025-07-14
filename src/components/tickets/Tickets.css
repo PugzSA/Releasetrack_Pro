@@ -4,8 +4,7 @@
 
 .filter-section {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
   padding: 10px 0;
   border-bottom: 1px solid var(--border-color);
 }
@@ -14,7 +13,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 15px;
-  flex: 2;
+  margin-bottom: 15px;
 }
 
 .filter-select {
@@ -27,7 +26,6 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  flex: 1;
   gap: 10px;
 }
 
@@ -36,6 +34,44 @@
   white-space: nowrap;
   display: flex;
   align-items: center;
+}
+
+/* Saved filters dropdown styling */
+.saved-filters-dropdown .dropdown-toggle {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.saved-filters-dropdown .dropdown-menu {
+  min-width: 250px;
+}
+
+.saved-filters-dropdown .dropdown-item {
+  padding: 0.5rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.saved-filters-dropdown .dropdown-item span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.saved-filters-dropdown .dropdown-item .btn-link {
+  padding: 0;
+  margin-left: 10px;
+  font-size: 0.875rem;
+}
+
+.saved-filters-dropdown .dropdown-item:active .btn-link {
+  color: #fff;
 }
 
 /* Make the sort button responsive */

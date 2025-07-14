@@ -75,37 +75,101 @@
 }
 
 .related-tickets {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
   margin-top: 10px;
 }
 
-.related-tickets h5 {
-  font-size: 14px;
-  font-weight: 500;
-  margin-bottom: 10px;
+.related-ticket-card {
+  background-color: #f5f5f5; /* Light gray background */
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 20px;
+  position: relative;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.related-ticket-item {
+.related-ticket-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.related-ticket-card .ticket-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 5px;
+}
+
+.related-ticket-card .ticket-title {
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.ticket-title-link {
+  color: #333;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.ticket-title-link:hover {
+  color: var(--primary-color);
+  text-decoration: underline;
+}
+
+.related-ticket-card .ticket-badges {
+  display: flex;
+  gap: 8px;
+}
+
+.related-ticket-card .ticket-id {
+  font-size: 13px;
+  color: var(--light-text);
+  margin-bottom: 8px;
+}
+
+.related-ticket-card .ticket-details {
+  display: flex;
+  gap: 20px;
+  font-size: 14px;
+}
+
+.related-ticket-card .ticket-assignee,
+.related-ticket-card .ticket-support-area {
   display: flex;
   align-items: center;
-  padding: 10px;
-  background-color: #f9f9f9;
-  border-radius: 4px;
-  margin-bottom: 10px;
+  gap: 5px;
 }
 
-.related-ticket-item .ticket-badges {
-  margin-right: 10px;
+.related-ticket-card .ticket-detail {
+  background-color: #f8f9fe;
+  border-left: 4px solid #4a6cf7;
+  padding: 15px;
+  border-radius: 0 8px 8px 0;
+  margin: 15px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.related-ticket-item .ticket-title {
-  flex: 1;
-  font-weight: 500;
+.related-ticket-card .ticket-detail h6 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: #4a6cf7;
 }
 
-.related-ticket-item .ticket-id {
-  color: var(--light-text);
-  font-size: 12px;
-  margin-right: 10px;
+.related-ticket-card .ticket-detail p {
+  font-size: 14px;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.related-ticket-card .ticket-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
 }
 
 .empty-tickets {
