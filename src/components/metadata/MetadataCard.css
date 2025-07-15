@@ -1,0 +1,128 @@
+.metadata-card {
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  transition: box-shadow 0.3s ease;
+}
+
+.metadata-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.metadata-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.metadata-card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.metadata-card-badges {
+  display: flex;
+  gap: 8px;
+}
+
+.metadata-card-details-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.metadata-card-detail-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.metadata-card-divider {
+  color: #ccc;
+}
+
+.metadata-card-footer .status-badge {
+  background-color: #e0e0e0;
+  color: #333;
+  font-weight: normal;
+  padding: 0.25em 0.6em;
+  border-radius: 10px;
+  font-size: 0.875em;
+}
+
+.metadata-card-footer .action-buttons {
+  margin-top: 16px;
+}
+
+.metadata-card-section {
+  margin-top: 16px;
+}
+
+.metadata-card-section h6 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 8px;
+}
+
+.metadata-card-section p {
+  font-size: 0.9rem;
+  color: #444;
+  margin-bottom: 0;
+  white-space: pre-wrap;
+}
+
+.metadata-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+/* General status badge styling */
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 12px;
+  text-transform: capitalize;
+  border: 1px solid transparent;
+}
+
+/* Type badges */
+.status-badge.apex-class { background-color: #e6f7ff; color: #0050b3; border-color: #91d5ff; }
+.status-badge.custom-field { background-color: #f6ffed; color: #389e0d; border-color: #b7eb8f; }
+.status-badge.validation-rule { background-color: #fff1f0; color: #cf1322; border-color: #ffa39e; }
+
+/* Action badges */
+.status-badge.create { background-color: #f9f0ff; color: #531dab; border-color: #d3adf7; }
+.status-badge.update { background-color: #e6f7ff; color: #0050b3; border-color: #91d5ff; }
+.status-badge.delete { background-color: #fff1f0; color: #cf1322; border-color: #ffa39e; }
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+}
+
+.btn-icon {
+  font-size: 1.1rem;
+  padding: 4px 8px;
+  color: #888;
+}
+
+.btn-icon:hover {
+  color: #333;
+}

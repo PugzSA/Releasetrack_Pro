@@ -9,7 +9,7 @@ import './NewMetadata.css'; // Reuse the same CSS
 const EditMetadata = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { metadataItems, updateMetadataItem, releases, tickets } = useAppContext();
+  const { metadataItems, updateMetadataItem, releases, tickets, loading: contextLoading } = useAppContext();
   
   // State for the typeahead component
   const [selectedTicket, setSelectedTicket] = useState([]);
@@ -19,7 +19,6 @@ const EditMetadata = () => {
     .sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date))
     .slice(0, 15)
     .map(ticket => {
-      console.log('Ticket object in EditMetadata:', ticket);
       return {
         id: ticket.id,
         label: `${ticket.id_display || ticket.id} - ${ticket.title}`
@@ -39,9 +38,17 @@ const EditMetadata = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+
+  if (contextLoading || !metadataItems || !tickets) {
+    return <div className="text-center p-5"><div className="spinner-border"></div></div>;
+  }
   
   // Load the metadata item data when the component mounts
   useEffect(() => {
+    if (!metadataItems || metadataItems.length === 0) {
+      return; // Wait for the context to load
+    }
+
     const metadataItem = metadataItems.find(item => item.id === parseInt(id));
     
     if (metadataItem) {
@@ -55,8 +62,6 @@ const EditMetadata = () => {
         ticket_id: metadataItem.ticket_id || null
       });
       
-      console.log('Loaded metadata item:', metadataItem);
-      
       // Set the selected ticket for the typeahead if there's a ticket_id
       if (metadataItem.ticket_id) {
         const ticket = tickets.find(t => t.id === metadataItem.ticket_id);
@@ -68,9 +73,11 @@ const EditMetadata = () => {
         }
       }
     } else {
-      setError('Metadata item not found');
+      if (!contextLoading) {
+        setError('Metadata item not found');
+      }
     }
-  }, [id, metadataItems, tickets]);
+  }, [id, metadataItems]);
   
   const handleChange = (e) => {
     const { name, value } = e.target;

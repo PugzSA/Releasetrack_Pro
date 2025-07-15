@@ -80,3 +80,13 @@
 [2025-07-11T12:40:09.172Z] 🚀 Calling Resend API with payload...
 [2025-07-11T12:40:11.043Z] ✅ Email sent successfully via Resend API
 [2025-07-11T12:40:11.044Z] Email ID:
+[2025-07-12T09:25:11.565Z] 💚 Health check requested
+[2025-07-12T09:25:11.566Z] 💚 Health check response: {"status":"ok","message":"Email proxy server is running","timestamp":"2025-07-12T09:25:11.566Z","apiKeyConfigured":true,"fromEmail":"notifications@sfdctest.online"}
+[2025-07-12T09:25:12.780Z] 💚 Health check requested
+[2025-07-12T09:25:12.781Z] 💚 Health check response: {"status":"ok","message":"Email proxy server is running","timestamp":"2025-07-12T09:25:12.781Z","apiKeyConfigured":true,"fromEmail":"notifications@sfdctest.online"}
+[2025-07-12T09:25:14.479Z] 💚 Health check requested
+[2025-07-12T09:25:14.480Z] 💚 Health check response: {"status":"ok","message":"Email proxy server is running","timestamp":"2025-07-12T09:25:14.480Z","apiKeyConfigured":true,"fromEmail":"notifications@sfdctest.online"}
+[2025-07-13T08:31:36.830Z] 💚 Health check requested
+[2025-07-13T08:31:36.833Z] 💚 Health check response: {"status":"ok","message":"Email proxy server is running","timestamp":"2025-07-13T08:31:36.833Z","apiKeyConfigured":true,"fromEmail":"notifications@sfdctest.online"}
+[2025-07-14T06:44:49.257Z] 💚 Health check requested
+[2025-07-14T06:44:49.262Z] 💚 Health check response: {"status":"ok","message":"Email proxy server is running","timestamp":"2025-07-14T06:44:49.262Z","apiKeyConfigured":true,"fromEmail":"notifications@sfdctest.online"}

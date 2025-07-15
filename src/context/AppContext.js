@@ -1,18 +1,20 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import dataService from '../services/DataService';
+import React, { createContext, useState, useEffect, useRef, useContext } from 'react';
+
 import supabaseDataService from '../services/SupabaseDataService';
 import emailService from '../services/EmailService';
 import { supabase } from '../services/supabase';
-import { setupNotificationTables } from '../utils/setupNotificationTables';
+
 
 // Use Supabase service if environment variables are set, otherwise fallback to mock data
-const service = process.env.REACT_APP_SUPABASE_URL ? supabaseDataService : dataService;
+const service = process.env.REACT_APP_SUPABASE_URL ? supabaseDataService : null;
 
 // Create the context
 const AppContext = createContext();
 
+
 // Context provider component
 export const AppProvider = ({ children }) => {
+  const fetchInitiated = useRef(false);
   const [releases, setReleases] = useState([]);
   const [tickets, setTickets] = useState([]);
   const [metadataItems, setMetadataItems] = useState([]);
@@ -29,7 +31,7 @@ export const AppProvider = ({ children }) => {
       const initNotificationTables = async () => {
         try {
           console.log('Initializing notification tables...');
-          const result = await setupNotificationTables(supabase);
+
           
           if (result.success) {
             console.log('✅ Notification tables setup complete');
@@ -71,120 +73,72 @@ export const AppProvider = ({ children }) => {
 
   // Fetch initial data
   useEffect(() => {
+    if (fetchInitiated.current) {
+      return;
+    }
+    fetchInitiated.current = true;
     const fetchData = async () => {
       try {
         setLoading(true);
         
-        // Fetch releases
-        const releasesData = await service.getReleases();
-        setReleases(releasesData);
-        
-        // Fetch tickets
-        const ticketsData = await service.getTickets();
-        setTickets(ticketsData);
-        
-        // Fetch saved filters
-        try {
-          const savedFiltersData = await service.getSavedFilters();
-          setSavedFilters(savedFiltersData);
-        } catch (filterError) {
-          console.error('Error fetching saved filters:', filterError);
-          // Don't fail the entire data load if saved filters fail
-        }
-        
-        // Find the highest ticket number to ensure we continue the sequence
-        if (ticketsData && ticketsData.length > 0) {
-          console.log(`Found ${ticketsData.length} tickets in the database`);
-          
-          // Log all ticket IDs for debugging
-          console.log('All ticket IDs:', ticketsData.map(t => t.id));
-          
-          // Check if we have the specific ticket ID mentioned by the user
-          const hasSUP10 = ticketsData.some(t => t.id === 'SUP-00010');
-          console.log(`Database contains SUP-00010: ${hasSUP10}`);
-          
-          // Manually find the highest ticket number for debugging
-          let manualHighest = 0;
-          let manualHighestId = null;
-          
-          ticketsData.forEach(ticket => {
-            console.log(`Processing ticket: ${JSON.stringify(ticket)}`);
-            if (ticket && ticket.id) {
-              console.log(`  Ticket ID: ${ticket.id}`);
-              const match = ticket.id.match(/SUP-(\d+)/);
-              if (match) {
-                const num = parseInt(match[1], 10);
-                console.log(`  Parsed number: ${num}`);
-                if (!isNaN(num) && num > manualHighest) {
-                  manualHighest = num;
-                  manualHighestId = ticket.id;
-                }
-              } else {
-                console.log(`  No match for ticket ID: ${ticket.id}`);
-              }
-            } else {
-              console.log(`  Invalid ticket: ${ticket}`);
-            }
-          });
-          
-          console.log(`Manual highest ticket: ${manualHighestId} (${manualHighest})`);
-          
-          // Now proceed with the sorting approach
-          const sortedTickets = [...ticketsData].sort((a, b) => {
-            // Extract numeric parts from ticket IDs (e.g., 00001 from SUP-00001)
-            const aMatch = a.id?.match(/SUP-(\d+)/);
-            const bMatch = b.id?.match(/SUP-(\d+)/);
-            
-            // Log the matches for debugging
-            console.log(`Comparing: ${a.id} vs ${b.id}`);
-            console.log(`  Match for ${a.id}: ${aMatch ? aMatch[1] : 'no match'}`);
-            console.log(`  Match for ${b.id}: ${bMatch ? bMatch[1] : 'no match'}`);
-            
-            // If either doesn't match the pattern, put it at the end
-            if (!aMatch) return 1;
-            if (!bMatch) return -1;
-            
-            // Compare the numeric values
-            const aNum = parseInt(aMatch[1], 10);
-            const bNum = parseInt(bMatch[1], 10);
-            
-            console.log(`  Parsed numbers: ${aNum} vs ${bNum}`);
-            
-            // Sort in descending order (highest first)
-            return bNum - aNum;
-          });
-          
-          // Get the highest ticket ID (first after sorting)
-          const highestTicket = sortedTickets[0];
-          console.log(`Highest ticket ID after sorting: ${highestTicket.id}`);
-          
-          // Extract the number from the highest ticket ID
-          const match = highestTicket.id.match(/SUP-(\d+)/);
-          if (match) {
-            const highestNumber = parseInt(match[1], 10);
-            console.log(`Setting lastTicketNumber to: ${highestNumber} (type: ${typeof highestNumber})`);
-            setLastTicketNumber(highestNumber);
-          } else {
-            console.warn(`Could not parse ticket number from highest ticket ID: ${highestTicket.id}`);
-            // Keep the default value
-          }
-          
-          // Verify the lastTicketNumber value after setting
-          setTimeout(() => {
-            console.log(`Verification - lastTicketNumber is now: ${lastTicketNumber} (type: ${typeof lastTicketNumber})`);
-          }, 0);
+        const promises = [
+          supabaseDataService.getReleases(),
+          supabaseDataService.getTickets(),
+          supabaseDataService.getMetadataItems(),
+          supabaseDataService.getSavedFilters()
+        ];
+
+        const results = await Promise.allSettled(promises);
+        const [releasesResult, ticketsResult, metadataResult, savedFiltersResult] = results;
+
+        if (releasesResult.status === 'fulfilled') {
+          setReleases(releasesResult.value);
         } else {
-          console.log('No tickets found in the database, using default ticket number');
+          console.error('Error fetching releases:', releasesResult.reason);
         }
-        
-        // Fetch metadata items
-        const metadataData = await service.getMetadataItems();
-        setMetadataItems(metadataData);
+
+        if (metadataResult.status === 'fulfilled') {
+          setMetadataItems(metadataResult.value);
+        } else {
+          console.error('Error fetching metadata:', metadataResult.reason);
+        }
+
+        if (savedFiltersResult.status === 'fulfilled') {
+          setSavedFilters(savedFiltersResult.value);
+        } else {
+          console.error('Error fetching saved filters:', savedFiltersResult.reason);
+        }
+
+        if (ticketsResult.status === 'fulfilled') {
+          const ticketsData = ticketsResult.value;
+          setTickets(() => [...ticketsData]);
+
+          if (ticketsData && ticketsData.length > 0) {
+            const sortedTickets = [...ticketsData].sort((a, b) => {
+              const aMatch = a.id?.match(/SUP-(\d+)/);
+              const bMatch = b.id?.match(/SUP-(\d+)/);
+              if (!aMatch) return 1;
+              if (!bMatch) return -1;
+              return parseInt(bMatch[1], 10) - parseInt(aMatch[1], 10);
+            });
+
+            if (sortedTickets.length > 0) {
+              const highestTicket = sortedTickets[0];
+              const match = highestTicket.id.match(/SUP-(\d+)/);
+              if (match) {
+                setLastTicketNumber(parseInt(match[1], 10));
+              }
+            }
+          }
+        } else {
+          console.error('Error fetching tickets:', ticketsResult.reason);
+        }
         
         setLoading(false);
       } catch (err) {
         console.error('Error fetching data:', err);
         setError('Failed to load data. Please try again later.');
+        setMetadataItems([]); // Ensure metadataItems is always an array
         setLoading(false);
       }
     };
@@ -195,7 +149,7 @@ export const AppProvider = ({ children }) => {
   // Release CRUD operations
   const addRelease = async (releaseData) => {
     try {
-      const newRelease = await service.createRelease(releaseData);
+      const newRelease = await supabaseDataService.createRelease(releaseData);
       setReleases([...releases, newRelease]);
       return newRelease;
     } catch (err) {
@@ -206,7 +160,7 @@ export const AppProvider = ({ children }) => {
 
   const updateRelease = async (id, releaseData) => {
     try {
-      const updatedRelease = await service.updateRelease(id, releaseData);
+      const updatedRelease = await supabaseDataService.updateRelease(id, releaseData);
       setReleases(releases.map(release => 
         release.id === parseInt(id) ? updatedRelease : release
       ));
@@ -219,7 +173,7 @@ export const AppProvider = ({ children }) => {
 
   const deleteRelease = async (id) => {
     try {
-      await service.deleteRelease(id);
+      await supabaseDataService.deleteRelease(id);
       setReleases(releases.filter(release => release.id !== parseInt(id)));
       return true;
     } catch (err) {
@@ -232,76 +186,30 @@ export const AppProvider = ({ children }) => {
   const addTicket = async (ticketData) => {
     try {
       console.log('=== ADDING NEW TICKET ===');
-      
-      // IMPORTANT: Fetch the latest tickets from the database to ensure we have the most up-to-date information
-      console.log('Fetching latest tickets from database to ensure unique ID generation');
-      const latestTickets = await service.getTickets();
-      
-      // Find the highest ticket number from the database
-      let highestNumber = 0;
-      
-      if (latestTickets && latestTickets.length > 0) {
-        console.log(`Found ${latestTickets.length} tickets in the database`);
-        
-        // Sort tickets by ID in descending order
-        const sortedTickets = [...latestTickets].sort((a, b) => {
-          const aMatch = a.id?.match(/SUP-(\d+)/);
-          const bMatch = b.id?.match(/SUP-(\d+)/);
-          
-          if (!aMatch) return 1;
-          if (!bMatch) return -1;
-          
-          const aNum = parseInt(aMatch[1], 10);
-          const bNum = parseInt(bMatch[1], 10);
-          
-          return bNum - aNum;
-        });
-        
-        // Get the highest ticket ID
-        const highestTicket = sortedTickets[0];
-        console.log(`Highest ticket ID in database: ${highestTicket.id}`);
-        
-        // Extract the number from the highest ticket ID
-        const match = highestTicket.id.match(/SUP-(\d+)/);
-        if (match) {
-          highestNumber = parseInt(match[1], 10);
-          console.log(`Highest ticket number from database: ${highestNumber}`);
-        }
-      } else {
-        console.log('No tickets found in the database, using default ticket number');
-      }
-      
-      // Use the higher of lastTicketNumber from state or highestNumber from database
-      const baseNumber = Math.max(
-        (typeof lastTicketNumber === 'number' && !isNaN(lastTicketNumber)) ? lastTicketNumber : 0,
-        highestNumber
-      );
-      
-      console.log(`Using base number for new ticket: ${baseNumber} (from lastTicketNumber: ${lastTicketNumber}, highestNumber: ${highestNumber})`);
-      
-      // Generate the next ticket number
-      const nextNumber = baseNumber + 1;
+
+      // Use the lastTicketNumber from state to generate the new ticket ID
+      const nextNumber = lastTicketNumber + 1;
       const paddedNumber = String(nextNumber).padStart(5, '0');
       const ticketId = `SUP-${paddedNumber}`;
-      
+
       console.log(`Generated new ticket ID: ${ticketId}`);
-      
+
       // Create the ticket with the ID
       const ticketWithId = {
         ...ticketData,
         id: ticketId
       };
-      
+
       // Create the ticket and update state
-      const newTicket = await service.createTicket(ticketWithId);
-      
-      // Update the tickets array with all the latest tickets plus our new one
-      setTickets([...latestTickets, newTicket]);
-      
+      const newTicket = await supabaseDataService.createTicket(ticketWithId);
+
+      // Update the tickets array with the new ticket
+      setTickets(prevTickets => [...prevTickets, newTicket]);
+
       // IMPORTANT: Update the lastTicketNumber state
       console.log(`Updating lastTicketNumber from ${lastTicketNumber} to ${nextNumber}`);
       setLastTicketNumber(nextNumber);
-      
+
       return newTicket;
     } catch (err) {
       setError('Failed to create ticket');
@@ -319,7 +227,7 @@ export const AppProvider = ({ children }) => {
       const assigneeChanged = currentTicket && currentTicket.assignee !== updatedTicket.assignee;
       
       // Update the ticket in the database
-      const updatedTicketData = await service.updateTicket(id, updatedTicket);
+      const updatedTicketData = await supabaseDataService.updateTicket(id, updatedTicket);
       
       // Update the tickets state
       setTickets(tickets.map(ticket => ticket.id === id ? updatedTicketData : ticket));
@@ -610,7 +518,7 @@ export const AppProvider = ({ children }) => {
 
   const deleteTicket = async (id) => {
     try {
-      await service.deleteTicket(id);
+      await supabaseDataService.deleteTicket(id);
       setTickets(tickets.filter(ticket => ticket.id !== id));
       return true;
     } catch (err) {
@@ -622,7 +530,7 @@ export const AppProvider = ({ children }) => {
   // Metadata CRUD operations
   const addMetadataItem = async (metadataData) => {
     try {
-      const newMetadataItem = await service.createMetadataItem(metadataData);
+      const newMetadataItem = await supabaseDataService.createMetadataItem(metadataData);
       setMetadataItems([...metadataItems, newMetadataItem]);
       return newMetadataItem;
     } catch (err) {
@@ -633,7 +541,7 @@ export const AppProvider = ({ children }) => {
 
   const updateMetadataItem = async (id, metadataData) => {
     try {
-      const updatedMetadataItem = await service.updateMetadataItem(id, metadataData);
+      const updatedMetadataItem = await supabaseDataService.updateMetadataItem(id, metadataData);
       setMetadataItems(metadataItems.map(item => 
         item.id === parseInt(id) ? updatedMetadataItem : item
       ));
@@ -646,7 +554,7 @@ export const AppProvider = ({ children }) => {
 
   const deleteMetadataItem = async (id) => {
     try {
-      await service.deleteMetadataItem(id);
+      await supabaseDataService.deleteMetadataItem(id);
       setMetadataItems(metadataItems.filter(item => item.id !== parseInt(id)));
       return true;
     } catch (err) {
@@ -658,7 +566,7 @@ export const AppProvider = ({ children }) => {
   // Saved Filters CRUD operations
   const getSavedFilters = async (filter_type) => {
     try {
-      const filters = await service.getSavedFilters(filter_type);
+      const filters = await supabaseDataService.getSavedFilters(filter_type);
       setSavedFilters(filters);
       return filters;
     } catch (err) {
@@ -669,7 +577,7 @@ export const AppProvider = ({ children }) => {
 
   const addSavedFilter = async (filterData) => {
     try {
-      const newFilter = await service.createSavedFilter(filterData);
+      const newFilter = await supabaseDataService.createSavedFilter(filterData);
       setSavedFilters([...savedFilters, newFilter]);
       return newFilter;
     } catch (err) {
@@ -680,7 +588,7 @@ export const AppProvider = ({ children }) => {
 
   const updateSavedFilter = async (id, filterData) => {
     try {
-      const updatedFilter = await service.updateSavedFilter(id, filterData);
+      const updatedFilter = await supabaseDataService.updateSavedFilter(id, filterData);
       setSavedFilters(savedFilters.map(filter => 
         filter.id === parseInt(id) ? updatedFilter : filter
       ));
@@ -693,13 +601,20 @@ export const AppProvider = ({ children }) => {
 
   const deleteSavedFilter = async (id) => {
     try {
-      await service.deleteSavedFilter(id);
+      await supabaseDataService.deleteSavedFilter(id);
       setSavedFilters(savedFilters.filter(filter => filter.id !== parseInt(id)));
       return true;
     } catch (err) {
       setError('Failed to delete saved filter');
       throw err;
     }
+  };
+
+  const getMetadataByTicketId = (ticketId) => {
+    if (!metadataItems || metadataItems.length === 0) {
+      return [];
+    }
+    return metadataItems.filter(item => item.ticket_id === ticketId);
   };
 
   // Clear any error messages
@@ -716,6 +631,7 @@ export const AppProvider = ({ children }) => {
         savedFilters,
         loading,
         error,
+        lastTicketNumber,
         addRelease,
         updateRelease,
         deleteRelease,
@@ -731,6 +647,7 @@ export const AppProvider = ({ children }) => {
         deleteSavedFilter,
         clearError,
         supabase,
+        getMetadataByTicketId,
         emailService
       }}
     >

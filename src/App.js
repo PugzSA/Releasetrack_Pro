@@ -34,7 +34,7 @@ function App() {
           <Route path="/tickets" element={<Tickets />} />
           <Route path="/tickets/new" element={<NewTicket />} />
           <Route path="/metadata" element={<Metadata />} />
-          <Route path="/metadata/new" element={<NewMetadata />} />
+          <Route path="/metadata/create" element={<NewMetadata />} />
           <Route path="/metadata/edit/:id" element={<EditMetadata />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/release-strategy" element={<ReleaseStrategy />} />

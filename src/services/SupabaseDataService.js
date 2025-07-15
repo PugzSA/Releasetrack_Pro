@@ -47,7 +47,8 @@ class SupabaseDataService {
         .from('releases')
         .select('*')
         .eq('id', id)
-        .single();
+        .single()
+        .abortSignal(signal);
       
       if (error) throw error;
       if (!release) return null;
@@ -140,7 +141,8 @@ class SupabaseDataService {
         .from('tickets')
         .select('*')
         .eq('id', id)
-        .single();
+        .single()
+        .abortSignal(signal);
       
       if (error) throw error;
       return data;
@@ -155,7 +157,8 @@ class SupabaseDataService {
       const { data, error } = await supabase
         .from('tickets')
         .select('*')
-        .eq('releaseId', releaseId);
+        .eq('release_id', releaseId)
+        .abortSignal(signal);
       
       if (error) throw error;
       return data || [];
@@ -234,7 +237,8 @@ class SupabaseDataService {
         .from('metadata')
         .select('*')
         .eq('id', id)
-        .single();
+        .single()
+        .abortSignal(signal);
       
       if (error) throw error;
       return data;
@@ -249,7 +253,8 @@ class SupabaseDataService {
       const { data, error } = await supabase
         .from('metadata')
         .select('*')
-        .eq('release_id', releaseId);
+        .eq('release_id', releaseId)
+        .abortSignal(signal);
       
       if (error) throw error;
       return data || [];
@@ -264,7 +269,8 @@ class SupabaseDataService {
       const { data, error } = await supabase
         .from('metadata')
         .select('*')
-        .eq('ticket_id', ticketId);
+        .eq('ticket_id', ticketId)
+        .abortSignal(signal);
       
       if (error) throw error;
       return data || [];
@@ -481,40 +487,25 @@ class SupabaseDataService {
     }
   }
 
-  // Saved Filters Management
-  async getSavedFilters(filter_type) {
+  async getSavedFilters(options = {}) {
+    const { signal, filter_type } = options;
     try {
       let query = supabase
         .from('saved_filters')
-        .select('*');
-      
+        .select('*')
+        .abortSignal(signal);
+
       // If filter_type is provided, filter by it
       if (filter_type) {
         query = query.eq('filter_type', filter_type);
       }
-      
+
       const { data, error } = await query;
       
       if (error) throw error;
       return data || [];
     } catch (error) {
       console.error('Error fetching saved filters:', error);
-      throw error;
-    }
-  }
-
-  async getSavedFilterById(id) {
-    try {
-      const { data, error } = await supabase
-        .from('saved_filters')
-        .select('*')
-        .eq('id', id)
-        .single();
-      
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error(`Error fetching saved filter with id ${id}:`, error);
       throw error;
     }
   }

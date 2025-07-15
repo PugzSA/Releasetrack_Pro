@@ -206,10 +206,10 @@ const NotificationSettings = () => {
                     setError(null);
                     
                     // Import the setup function
-                    const { setupNotificationTables } = await import('../../utils/setupNotificationTables');
+
                     
                     // Try to initialize the tables
-                    const result = await setupNotificationTables(supabase);
+
                     
                     if (result.success) {
                       // If successful, try to fetch preferences again
