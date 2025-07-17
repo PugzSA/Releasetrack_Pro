@@ -1,0 +1,49 @@
+.user-avatar-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.user-avatar-image {
+    border: 2px solid transparent;
+    transition: border-color 0.2s;
+    cursor: pointer;
+}
+
+.user-avatar-toggle:hover .user-avatar-image {
+    border-color: var(--primary-color);
+}
+
+.avatar-placeholder {
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    border: 2px solid transparent;
+    transition: border-color 0.2s;
+    cursor: pointer;
+}
+
+.user-avatar-toggle:hover .avatar-placeholder {
+    border-color: var(--primary-color);
+    background-color: #1565c0;
+}
+
+.user-avatar-toggle {
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+
+.user-avatar-toggle:hover {
+    text-decoration: none;
+}
+
+.dropdown-menu {
+    margin-top: 8px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}

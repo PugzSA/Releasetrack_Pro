@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import TicketModal from "./TicketModal";
 import NewTicketModal from "./NewTicketModal";
+import UserAvatar from "../common/UserAvatar";
 import { useApp } from "../../context/AppContext";
 import { Search, Filter, User, Clock, List, Grid, Plus } from "lucide-react";
 import "./Tickets.css";
@@ -334,9 +335,12 @@ const Tickets = () => {
             <button className="btn btn-icon me-2">
               <Search size={20} />
             </button>
-            <button className="btn btn-icon">
+            <button className="btn btn-icon me-3">
               <Filter size={20} />
             </button>
+
+            {/* User Avatar */}
+            <UserAvatar size={32} />
           </div>
         </div>
       </div>

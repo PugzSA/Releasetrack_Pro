@@ -130,13 +130,23 @@
 .tickets-page-modern {
   min-height: 100vh;
   background-color: #f8f9fa;
+  margin: -24px -24px 0 -24px; /* Remove top and side padding from parent */
+  padding: 0; /* Remove any internal padding */
 }
 
 /* Header Styling */
 .tickets-header-modern {
   background-color: white;
   border-bottom: 1px solid #e9ecef;
-  padding: 1.5rem 2rem;
+  padding: 1rem 2rem;
+}
+
+.tickets-header-modern .d-flex {
+  align-items: center;
+}
+
+.tickets-header-modern .user-avatar-container {
+  margin-left: 0.5rem;
 }
 
 .tickets-title {
@@ -193,7 +203,7 @@
 
 /* Content Area */
 .tickets-content-modern {
-  padding: 2rem;
+  padding: 1rem 2rem 2rem 2rem;
 }
 
 .tickets-list-container {
