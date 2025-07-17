@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Modal, Button, Alert } from 'react-bootstrap';
-import { useAppContext } from '../../context/AppContext';
+import { useApp } from '../../context/AppContext';
 
 const DeleteTicketModal = ({ show, handleClose, ticket }) => {
-  const { deleteTicket } = useAppContext();
+  const { deleteTicket } = useApp();
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);

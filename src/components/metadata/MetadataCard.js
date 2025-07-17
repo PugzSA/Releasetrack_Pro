@@ -1,12 +1,12 @@
 import React from 'react';
 import { Button } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAppContext } from '../../context/AppContext';
+import { useApp } from '../../context/AppContext';
 import './MetadataCard.css';
 
 const MetadataCard = ({ metadataItem, onDeleteClick }) => {
   const navigate = useNavigate();
-  const { tickets, releases } = useAppContext();
+  const { tickets, releases } = useApp();
 
   const getTicketInfo = (ticketId) => {
     if (!ticketId) return { id: 'None', title: '' };

@@ -3,13 +3,13 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Form, Button, Card, Alert } from 'react-bootstrap';
 import { Typeahead } from 'react-bootstrap-typeahead';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
-import { useAppContext } from '../context/AppContext';
+import { useApp } from '../context/AppContext';
 import './NewMetadata.css'; // Reuse the same CSS
 
 const EditMetadata = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { metadataItems, updateMetadataItem, releases, tickets, loading: contextLoading } = useAppContext();
+  const { metadataItems, updateMetadataItem, releases, tickets, loading: contextLoading } = useApp();
   
   // State for the typeahead component
   const [selectedTicket, setSelectedTicket] = useState([]);

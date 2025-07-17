@@ -1,27 +1,23 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import './Sidebar.css';
+import logo from '../../assets/ReleaseTrack_Pro logo.png';
 
 const Sidebar = () => {
   return (
     <div className="sidebar">
       <div className="sidebar-header">
-        <div className="app-icon">
-          <img src="/logo.svg" alt="ReleaseTrack Pro" />
-        </div>
-        <div className="app-info">
-          <h1>SF Change Manager</h1>
-          <p>Deployment Tracking</p>
-        </div>
+        <img src={logo} alt="ReleaseTrack Pro" className="sidebar-logo" />
       </div>
       
       <div className="sidebar-content">
-        <div className="navigation-title">NAVIGATION</div>
-        <nav className="sidebar-nav">
-          <NavLink to="/" className={({isActive}) => isActive ? 'nav-item active' : 'nav-item'}>
-            <i className="bi bi-grid"></i>
-            Dashboard
-          </NavLink>
+        <div className="navigation-wrapper">
+          <div className="navigation-title">NAVIGATION</div>
+          <nav className="sidebar-nav">
+            <NavLink to="/" className={({isActive}) => isActive ? 'nav-item active' : 'nav-item'}>
+              <i className="bi bi-grid"></i>
+              Dashboard
+            </NavLink>
           <NavLink to="/releases" className={({isActive}) => isActive ? 'nav-item active' : 'nav-item'}>
             <i className="bi bi-box"></i>
             Releases
@@ -51,8 +47,9 @@ const Sidebar = () => {
             Release Guidelines
           </NavLink>
         </nav>
-        
-        <div className="sidebar-footer">
+      </div>
+      
+      <div className="sidebar-footer">
           <NavLink to="/settings" className={({isActive}) => isActive ? 'nav-item active' : 'nav-item'}>
             <i className="bi bi-gear"></i>
             Settings

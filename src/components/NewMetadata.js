@@ -3,13 +3,13 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Form, Button, Card, Alert } from 'react-bootstrap';
 import { Typeahead } from 'react-bootstrap-typeahead';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
-import { useAppContext } from '../context/AppContext';
+import { useApp } from '../context/AppContext';
 import './NewMetadata.css';
 
 const NewMetadata = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { addMetadataItem, releases, tickets } = useAppContext();
+  const { addMetadataItem, releases, tickets } = useApp();
   
   // Parse query parameters to get ticketId if present
   const queryParams = new URLSearchParams(location.search);

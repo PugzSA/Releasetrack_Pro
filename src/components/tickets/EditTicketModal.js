@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, Form, Row, Col, Alert } from 'react-bootstrap';
-import { useAppContext } from '../../context/AppContext';
+import { useApp } from '../../context/AppContext';
 import NotificationToast from '../common/NotificationToast';
 
 const EditTicketModal = ({ show, handleClose, ticket, onTicketUpdate }) => {
-  const { updateTicket, releases, supabase } = useAppContext();
+  const { updateTicket, releases, supabase } = useApp();
   const [users, setUsers] = useState([]);
   
   const [formData, setFormData] = useState({
@@ -47,7 +47,9 @@ const EditTicketModal = ({ show, handleClose, ticket, onTicketUpdate }) => {
       }
     };
     
-    fetchUsers();
+    if (supabase) {
+      fetchUsers();
+    }
   }, [supabase]);
   
   // Update form data when ticket changes

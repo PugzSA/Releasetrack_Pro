@@ -1,39 +1,77 @@
 import { supabase } from './supabase';
 
 class SupabaseDataService {
+  // Auth
+  async signInWithGoogle() {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+      });
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error signing in with Google:', error);
+      throw error;
+    }
+  }
+
+  async signOut() {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error signing out:', error);
+      throw error;
+    }
+  }
+
+  onAuthStateChange(callback) {
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      callback(session);
+    });
+    return authListener;
+  }
+
+  // Ticket Management
+  async getTickets() {
+    try {
+      const { data, error } = await supabase.from('tickets').select('*');
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error fetching tickets:', error);
+      throw error;
+    }
+  }
+
+  // User & Metadata Lookups
+  async getUsers() {
+    try {
+      const { data, error } = await supabase.from('users').select('*');
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      throw error;
+    }
+  }
+
+
+
   // Release Management
   async getReleases() {
     try {
-      // First, get all releases
-      const { data: releases, error } = await supabase
-        .from('releases')
-        .select('*');
-      
+      const { data: releases, error } = await supabase.from('releases').select('*');
       if (error) throw error;
-      
-      // If no releases, return empty array
       if (!releases || releases.length === 0) return [];
-      
-      // Get all tickets
-      const { data: tickets, error: ticketsError } = await supabase
-        .from('tickets')
-        .select('*');
-      
+
+      const { data: tickets, error: ticketsError } = await supabase.from('tickets').select('*');
       if (ticketsError) throw ticketsError;
-      
-      // Map tickets to their respective releases
-      const releasesWithTickets = releases.map(release => {
-        const relatedTickets = tickets ? tickets.filter(ticket => 
-          ticket.release_id === release.id
-        ) : [];
-        
-        return {
-          ...release,
-          tickets: relatedTickets
-        };
-      });
-      
-      return releasesWithTickets;
+
+      return releases.map(release => ({
+        ...release,
+        tickets: tickets ? tickets.filter(ticket => ticket.release_id === release.id) : []
+      }));
     } catch (error) {
       console.error('Error fetching releases with tickets:', error);
       throw error;
@@ -42,30 +80,14 @@ class SupabaseDataService {
 
   async getReleaseById(id) {
     try {
-      // Get the release
-      const { data: release, error } = await supabase
-        .from('releases')
-        .select('*')
-        .eq('id', id)
-        .single()
-        .abortSignal(signal);
-      
+      const { data: release, error } = await supabase.from('releases').select('*').eq('id', id).single();
       if (error) throw error;
       if (!release) return null;
-      
-      // Get related tickets for this release
-      const { data: tickets, error: ticketsError } = await supabase
-        .from('tickets')
-        .select('*')
-        .eq('release_id', id);
-      
+
+      const { data: tickets, error: ticketsError } = await supabase.from('tickets').select('*').eq('release_id', id);
       if (ticketsError) throw ticketsError;
-      
-      // Add tickets to the release object
-      return {
-        ...release,
-        tickets: tickets || []
-      };
+
+      return { ...release, tickets: tickets || [] };
     } catch (error) {
       console.error(`Error fetching release with id ${id}:`, error);
       throw error;
@@ -74,12 +96,7 @@ class SupabaseDataService {
 
   async createRelease(releaseData) {
     try {
-      const { data, error } = await supabase
-        .from('releases')
-        .insert(releaseData)
-        .select()
-        .single();
-      
+      const { data, error } = await supabase.from('releases').insert(releaseData).select().single();
       if (error) throw error;
       return data;
     } catch (error) {
@@ -90,13 +107,7 @@ class SupabaseDataService {
 
   async updateRelease(id, releaseData) {
     try {
-      const { data, error } = await supabase
-        .from('releases')
-        .update(releaseData)
-        .eq('id', id)
-        .select()
-        .single();
-      
+      const { data, error } = await supabase.from('releases').update(releaseData).eq('id', id).select().single();
       if (error) throw error;
       return data;
     } catch (error) {
@@ -107,11 +118,7 @@ class SupabaseDataService {
 
   async deleteRelease(id) {
     try {
-      const { error } = await supabase
-        .from('releases')
-        .delete()
-        .eq('id', id);
-      
+      const { error } = await supabase.from('releases').delete().eq('id', id);
       if (error) throw error;
       return true;
     } catch (error) {
@@ -123,10 +130,7 @@ class SupabaseDataService {
   // Ticket Management
   async getTickets() {
     try {
-      const { data, error } = await supabase
-        .from('tickets')
-        .select('*');
-      
+      const { data, error } = await supabase.from('tickets').select('*');
       if (error) throw error;
       return data || [];
     } catch (error) {
@@ -137,13 +141,7 @@ class SupabaseDataService {
 
   async getTicketById(id) {
     try {
-      const { data, error } = await supabase
-        .from('tickets')
-        .select('*')
-        .eq('id', id)
-        .single()
-        .abortSignal(signal);
-      
+      const { data, error } = await supabase.from('tickets').select('*').eq('id', id).single();
       if (error) throw error;
       return data;
     } catch (error) {
@@ -152,30 +150,9 @@ class SupabaseDataService {
     }
   }
 
-  async getTicketsByReleaseId(releaseId) {
-    try {
-      const { data, error } = await supabase
-        .from('tickets')
-        .select('*')
-        .eq('release_id', releaseId)
-        .abortSignal(signal);
-      
-      if (error) throw error;
-      return data || [];
-    } catch (error) {
-      console.error(`Error fetching tickets for release ${releaseId}:`, error);
-      throw error;
-    }
-  }
-
   async createTicket(ticketData) {
     try {
-      const { data, error } = await supabase
-        .from('tickets')
-        .insert(ticketData)
-        .select()
-        .single();
-      
+      const { data, error } = await supabase.from('tickets').insert(ticketData).select().single();
       if (error) throw error;
       return data;
     } catch (error) {
@@ -186,13 +163,7 @@ class SupabaseDataService {
 
   async updateTicket(id, ticketData) {
     try {
-      const { data, error } = await supabase
-        .from('tickets')
-        .update(ticketData)
-        .eq('id', id)
-        .select()
-        .single();
-      
+      const { data, error } = await supabase.from('tickets').update(ticketData).eq('id', id).select().single();
       if (error) throw error;
       return data;
     } catch (error) {
@@ -203,11 +174,7 @@ class SupabaseDataService {
 
   async deleteTicket(id) {
     try {
-      const { error } = await supabase
-        .from('tickets')
-        .delete()
-        .eq('id', id);
-      
+      const { error } = await supabase.from('tickets').delete().eq('id', id);
       if (error) throw error;
       return true;
     } catch (error) {
@@ -219,10 +186,7 @@ class SupabaseDataService {
   // Metadata Management
   async getMetadataItems() {
     try {
-      const { data, error } = await supabase
-        .from('metadata')
-        .select('*');
-      
+      const { data, error } = await supabase.from('metadata').select('*');
       if (error) throw error;
       return data || [];
     } catch (error) {
@@ -231,111 +195,10 @@ class SupabaseDataService {
     }
   }
 
-  async getMetadataItemById(id) {
-    try {
-      const { data, error } = await supabase
-        .from('metadata')
-        .select('*')
-        .eq('id', id)
-        .single()
-        .abortSignal(signal);
-      
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error(`Error fetching metadata item with id ${id}:`, error);
-      throw error;
-    }
-  }
-
-  async getMetadataByReleaseId(releaseId) {
-    try {
-      const { data, error } = await supabase
-        .from('metadata')
-        .select('*')
-        .eq('release_id', releaseId)
-        .abortSignal(signal);
-      
-      if (error) throw error;
-      return data || [];
-    } catch (error) {
-      console.error(`Error fetching metadata for release ${releaseId}:`, error);
-      throw error;
-    }
-  }
-
-  async getMetadataByTicketId(ticketId) {
-    try {
-      const { data, error } = await supabase
-        .from('metadata')
-        .select('*')
-        .eq('ticket_id', ticketId)
-        .abortSignal(signal);
-      
-      if (error) throw error;
-      return data || [];
-    } catch (error) {
-      console.error(`Error fetching metadata for ticket ${ticketId}:`, error);
-      throw error;
-    }
-  }
-
   async createMetadataItem(metadataData) {
     try {
-      // Create a clean copy of the data to avoid mutation issues
-      const cleanData = { ...metadataData };
-      
-      // Log the data being sent to the database
-      console.log('Creating metadata item with data:', JSON.stringify(cleanData, null, 2));
-      
-      // Handle all potentially numeric fields to ensure proper types
-      // This prevents 'invalid input syntax for type bigint' errors
-      
-      // Handle ticket_id field
-      if (cleanData.ticket_id === undefined || cleanData.ticket_id === '' || cleanData.ticket_id === 'null') {
-        cleanData.ticket_id = null;
-        console.log('Setting empty ticket_id to null');
-      }
-      
-      // Handle release_id field
-      if (cleanData.release_id === undefined || cleanData.release_id === '' || cleanData.release_id === 'null') {
-        cleanData.release_id = null;
-        console.log('Setting empty release_id to null');
-      } else if (cleanData.release_id && typeof cleanData.release_id === 'string') {
-        // Try to convert string to number if it's numeric
-        const numericReleaseId = parseInt(cleanData.release_id, 10);
-        if (!isNaN(numericReleaseId)) {
-          cleanData.release_id = numericReleaseId;
-          console.log('Converted release_id string to number:', numericReleaseId);
-        }
-      }
-      
-      // Handle type field - ensure it's a string
-      if (cleanData.type === undefined) {
-        cleanData.type = 'apex class';
-        console.log('Setting undefined type to default: apex class');
-      }
-      
-      // Handle action field - ensure it's a string
-      if (cleanData.action === undefined) {
-        cleanData.action = 'create';
-        console.log('Setting undefined action to default: create');
-      }
-      
-      console.log('Final data being sent to database:', JSON.stringify(cleanData, null, 2));
-      
-      const { data, error } = await supabase
-        .from('metadata')
-        .insert(cleanData)
-        .select()
-        .single();
-      
-      if (error) {
-        console.error('Supabase error creating metadata item:', error);
-        throw error;
-      }
-      
-      console.log('Successfully created metadata item:', data);
+      const { data, error } = await supabase.from('metadata').insert(metadataData).select().single();
+      if (error) throw error;
       return data;
     } catch (error) {
       console.error('Error creating metadata item:', error);
@@ -345,61 +208,8 @@ class SupabaseDataService {
 
   async updateMetadataItem(id, metadataData) {
     try {
-      // Create a clean copy of the data to avoid mutation issues
-      const cleanData = { ...metadataData };
-      
-      // Log the data being sent to the database
-      console.log(`Updating metadata item ${id} with data:`, JSON.stringify(cleanData, null, 2));
-      
-      // Handle all potentially numeric fields to ensure proper types
-      // This prevents 'invalid input syntax for type bigint' errors
-      
-      // Handle ticket_id field
-      if (cleanData.ticket_id === undefined || cleanData.ticket_id === '' || cleanData.ticket_id === 'null') {
-        cleanData.ticket_id = null;
-        console.log('Setting empty ticket_id to null');
-      }
-      
-      // Handle release_id field
-      if (cleanData.release_id === undefined || cleanData.release_id === '' || cleanData.release_id === 'null') {
-        cleanData.release_id = null;
-        console.log('Setting empty release_id to null');
-      } else if (cleanData.release_id && typeof cleanData.release_id === 'string') {
-        // Try to convert string to number if it's numeric
-        const numericReleaseId = parseInt(cleanData.release_id, 10);
-        if (!isNaN(numericReleaseId)) {
-          cleanData.release_id = numericReleaseId;
-          console.log('Converted release_id string to number:', numericReleaseId);
-        }
-      }
-      
-      // Handle type field - ensure it's a string
-      if (cleanData.type === undefined) {
-        cleanData.type = 'apex class';
-        console.log('Setting undefined type to default: apex class');
-      }
-      
-      // Handle action field - ensure it's a string
-      if (cleanData.action === undefined) {
-        cleanData.action = 'create';
-        console.log('Setting undefined action to default: create');
-      }
-      
-      console.log('Final data being sent to database:', JSON.stringify(cleanData, null, 2));
-      
-      const { data, error } = await supabase
-        .from('metadata')
-        .update(cleanData)
-        .eq('id', id)
-        .select()
-        .single();
-      
-      if (error) {
-        console.error('Supabase error updating metadata item:', error);
-        throw error;
-      }
-      
-      console.log('Successfully updated metadata item:', data);
+      const { data, error } = await supabase.from('metadata').update(metadataData).eq('id', id).select().single();
+      if (error) throw error;
       return data;
     } catch (error) {
       console.error(`Error updating metadata item ${id}:`, error);
@@ -409,11 +219,7 @@ class SupabaseDataService {
 
   async deleteMetadataItem(id) {
     try {
-      const { error } = await supabase
-        .from('metadata')
-        .delete()
-        .eq('id', id);
-      
+      const { error } = await supabase.from('metadata').delete().eq('id', id);
       if (error) throw error;
       return true;
     } catch (error) {
@@ -422,149 +228,56 @@ class SupabaseDataService {
     }
   }
 
-  // Release Strategy
-  async getReleaseStrategies() {
+  async getMetadataItems() {
     try {
-      const { data, error } = await supabase
-        .from('releaseStrategies')
-        .select('*');
-      
-      if (error) throw error;
-      return data || [];
-    } catch (error) {
-      console.error('Error fetching release strategies:', error);
-      throw error;
-    }
-  }
-
-  async getReleaseStrategyById(id) {
-    try {
-      const { data, error } = await supabase
-        .from('releaseStrategies')
-        .select('*')
-        .eq('id', id)
-        .single();
-      
+      const { data, error } = await supabase.from('metadata').select('*');
       if (error) throw error;
       return data;
     } catch (error) {
-      console.error(`Error fetching release strategy with id ${id}:`, error);
+      console.error('Error fetching metadata items:', error);
       throw error;
     }
   }
 
-  // Reports
-  async generateReleaseReport(filters = {}) {
+  // Saved Filters
+  async getSavedFilters(filterType) {
     try {
-      let query = supabase
-        .from('releases')
-        .select(`
-          *,
-          tickets:tickets(*),
-          metadata:metadata(*)
-        `);
-      
-      // Apply filters if provided
-      if (filters.startDate) {
-        query = query.gte('target', filters.startDate);
+      let query = supabase.from('saved_filters').select('*');
+      if (filterType) {
+        query = query.eq('filter_type', filterType);
       }
-      
-      if (filters.endDate) {
-        query = query.lte('target', filters.endDate);
-      }
-      
-      if (filters.status) {
-        query = query.eq('status', filters.status);
-      }
-      
       const { data, error } = await query;
-      
       if (error) throw error;
       return data || [];
     } catch (error) {
-      console.error('Error generating release report:', error);
+      const forType = filterType ? ` for ${filterType}` : '';
+      console.error(`Error fetching saved filters${forType}:`, error);
       throw error;
     }
   }
 
-  async getSavedFilters(options = {}) {
-    const { signal, filter_type } = options;
+  async saveFilter(filter) {
     try {
-      let query = supabase
-        .from('saved_filters')
-        .select('*')
-        .abortSignal(signal);
-
-      // If filter_type is provided, filter by it
-      if (filter_type) {
-        query = query.eq('filter_type', filter_type);
-      }
-
-      const { data, error } = await query;
-      
-      if (error) throw error;
-      return data || [];
-    } catch (error) {
-      console.error('Error fetching saved filters:', error);
-      throw error;
-    }
-  }
-
-  async createSavedFilter(filterData) {
-    try {
-      const { data, error } = await supabase
-        .from('saved_filters')
-        .insert({
-          ...filterData,
-          filter_type: filterData.filter_type || 'metadata',
-          created_at: new Date().toISOString()
-        })
-        .select()
-        .single();
-      
+      const { data, error } = await supabase.from('saved_filters').upsert(filter).select().single();
       if (error) throw error;
       return data;
     } catch (error) {
-      console.error('Error creating saved filter:', error);
+      console.error('Error saving filter:', error);
       throw error;
     }
   }
 
-  async updateSavedFilter(id, filterData) {
+  async deleteSavedFilter(filterId) {
     try {
-      const { data, error } = await supabase
-        .from('saved_filters')
-        .update({
-          ...filterData,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', id)
-        .select()
-        .single();
-      
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error(`Error updating saved filter ${id}:`, error);
-      throw error;
-    }
-  }
-
-  async deleteSavedFilter(id) {
-    try {
-      const { error } = await supabase
-        .from('saved_filters')
-        .delete()
-        .eq('id', id);
-      
+      const { error } = await supabase.from('saved_filters').delete().eq('id', filterId);
       if (error) throw error;
       return true;
     } catch (error) {
-      console.error(`Error deleting saved filter ${id}:`, error);
+      console.error(`Error deleting filter ${filterId}:`, error);
       throw error;
     }
   }
 }
 
-const supabaseDataService = new SupabaseDataService();
-export default supabaseDataService;
+const service = new SupabaseDataService();
+export default service;

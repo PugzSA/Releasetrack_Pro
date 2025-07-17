@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import './Releases.css';
 import { Button, Accordion, Modal } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAppContext } from '../../context/AppContext';
+import { useApp } from '../../context/AppContext';
 import EditTicketModal from '../tickets/EditTicketModal';
 
 const Releases = () => {
   const navigate = useNavigate();
-  const { releases, loading, error, deleteRelease, supabase } = useAppContext();
+  const { releases, loading, error, deleteRelease, supabase } = useApp();
   
   // State for delete confirmation modal
   const [showDeleteModal, setShowDeleteModal] = useState(false);

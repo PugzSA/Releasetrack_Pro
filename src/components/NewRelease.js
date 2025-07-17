@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Form, Button, Card, Alert } from 'react-bootstrap';
-import { useAppContext } from '../context/AppContext';
+import { useApp } from '../context/AppContext';
 import './NewRelease.css';
 
 const NewRelease = () => {
   const navigate = useNavigate();
-  const { addRelease } = useAppContext();
+  const { addRelease } = useApp();
   
   const [formData, setFormData] = useState({
     name: '',

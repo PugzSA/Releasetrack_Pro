@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Button, Modal, Form, Dropdown } from 'react-bootstrap';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAppContext } from '../../context/AppContext';
+import { useApp } from '../../context/AppContext';
 import CustomTypeahead from '../common/CustomTypeahead';
 import MetadataCard from './MetadataCard';
 import './Metadata.css';
@@ -9,15 +9,15 @@ import './Metadata.css';
 const Metadata = () => {
   const {
     metadataItems = [],
-    tickets,
-    releases,
+    tickets = [],
+    releases = [],
     savedFilters = [],
     addSavedFilter,
     deleteSavedFilter,
     deleteMetadataItem,
     loading,
     error
-  } = useAppContext();
+  } = useApp();
 
 
   const [filters, setFilters] = useState({

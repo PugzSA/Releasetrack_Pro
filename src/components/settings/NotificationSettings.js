@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Form, Button, Alert, Spinner } from 'react-bootstrap';
-import { useAppContext } from '../../context/AppContext';
+import { useApp } from '../../context/AppContext';
 
 const NotificationSettings = () => {
-  const { supabase } = useAppContext();
+  const { supabase } = useApp();
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

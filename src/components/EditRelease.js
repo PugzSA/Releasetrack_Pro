@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Form, Button, Card, Alert } from 'react-bootstrap';
-import { useAppContext } from '../context/AppContext';
+import { useApp } from '../context/AppContext';
 import './NewRelease.css'; // Reuse the same CSS
 
 const EditRelease = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { releases, updateRelease, loading: contextLoading } = useAppContext();
+  const { releases, updateRelease, loading: contextLoading } = useApp();
   
   const [formData, setFormData] = useState({
     name: '',

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Table, Badge, Spinner, Button, Form } from 'react-bootstrap';
-import { useAppContext } from '../../context/AppContext';
+import { useApp } from '../../context/AppContext';
 
 /**
  * Component to display email notification logs
  */
 const NotificationLogs = () => {
-  const { supabase } = useAppContext();
+  const { supabase } = useApp();
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

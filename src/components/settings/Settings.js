@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Form, Button, Table, Modal, Nav, Tab, Spinner } from 'react-bootstrap';
-import { useAppContext } from '../../context/AppContext';
+import { useApp } from '../../context/AppContext';
 import NotificationSettings from './NotificationSettings';
 import NotificationLogs from './NotificationLogs';
 import './Settings.css';
 
 const Settings = () => {
-  const { supabase } = useAppContext();
+  const { supabase } = useApp();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
