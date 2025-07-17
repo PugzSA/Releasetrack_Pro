@@ -10,8 +10,8 @@
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -122,60 +122,60 @@ body {
   color: #e53935;
 }
 
-/* New Status Badge Styles */
+/* Custom Status Badge Colors */
 .status-badge.backlog {
-  background-color: #e0e0e0;
-  color: #616161;
+  background-color: #e9ecef;
+  color: #6c757d;
 }
 
 .status-badge.cancelled {
-  background-color: #efebe9;
-  color: #795548;
+  background-color: #f8d7da;
+  color: #721c24;
 }
 
 .status-badge.requirements-gathering {
-  background-color: #e8eaf6;
-  color: #3f51b5;
+  background-color: #fff3cd;
+  color: #664d03;
 }
 
 .status-badge.in-technical-design {
-  background-color: #e1f5fe;
-  color: #03a9f4;
+  background-color: #fff3cd;
+  color: #664d03;
 }
 
 .status-badge.in-development {
-  background-color: #e3f2fd;
-  color: #1976d2;
+  background-color: #cfe2ff;
+  color: #084298;
 }
 
 .status-badge.blocked---user {
-  background-color: #f44336;
-  color: white;
+  background-color: #f8d7da;
+  color: #721c24;
 }
 
 .status-badge.blocked---dev {
-  background-color: #f44336;
-  color: white;
+  background-color: #f8d7da;
+  color: #721c24;
 }
 
 .status-badge.in-testing---dev {
-  background-color: #ff9800;
-  color: white;
+  background-color: #e2e3ff;
+  color: #3730a3;
 }
 
 .status-badge.in-testing---uat {
-  background-color: #ff9800;
-  color: white;
+  background-color: #e2e3ff;
+  color: #3730a3;
 }
 
 .status-badge.ready-for-release {
-  background-color: #e0f7fa;
-  color: #00acc1;
+  background-color: #d1e7dd;
+  color: #0f5132;
 }
 
 .status-badge.released {
-  background-color: #e8f5e9;
-  color: #43a047;
+  background-color: #d1e7dd;
+  color: #0f5132;
 }
 
 .tabs-container {

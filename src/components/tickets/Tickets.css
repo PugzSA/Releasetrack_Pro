@@ -353,6 +353,63 @@
   text-transform: capitalize;
 }
 
+/* Custom Status Badge Colors */
+.status-backlog {
+  background-color: #e9ecef;
+  color: #6c757d;
+}
+
+.status-cancelled {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.status-requirements-gathering {
+  background-color: #fff3cd;
+  color: #664d03;
+}
+
+.status-in-technical-design {
+  background-color: #fff3cd;
+  color: #664d03;
+}
+
+.status-in-development {
+  background-color: #cfe2ff;
+  color: #084298;
+}
+
+.status-blocked---user {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.status-blocked---dev {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.status-in-testing---dev {
+  background-color: #e2e3ff;
+  color: #3730a3;
+}
+
+.status-in-testing---uat {
+  background-color: #e2e3ff;
+  color: #3730a3;
+}
+
+.status-ready-for-release {
+  background-color: #d1e7dd;
+  color: #0f5132;
+}
+
+.status-released {
+  background-color: #d1e7dd;
+  color: #0f5132;
+}
+
+/* Legacy status badges for backward compatibility */
 .status-open {
   background-color: #cfe2ff;
   color: #084298;

@@ -1,23 +1,15 @@
 import React, { useState, useEffect, useMemo } from "react";
 import TicketModal from "./TicketModal";
+import NewTicketModal from "./NewTicketModal";
 import { useApp } from "../../context/AppContext";
-import {
-  Search,
-  Filter,
-  User,
-  Clock,
-  AlertCircle,
-  CheckCircle,
-  XCircle,
-  List,
-  Grid,
-} from "lucide-react";
+import { Search, Filter, User, Clock, List, Grid, Plus } from "lucide-react";
 import "./Tickets.css";
 
 const Tickets = () => {
   const {
     tickets,
     users,
+    releases,
     loading,
     filters,
     setFilters,
@@ -25,11 +17,15 @@ const Tickets = () => {
     saveFilter,
     deleteSavedFilter,
     selectSavedFilter,
+    createTicket,
+    updateTicket,
+    refreshData,
   } = useApp();
 
   // All hooks must be called at the top level, before any conditional returns.
   const [viewMode, setViewMode] = useState("list");
   const [selectedTicket, setSelectedTicket] = useState(null);
+  const [showNewTicketModal, setShowNewTicketModal] = useState(false);
 
   // Helper functions matching the example
   const getPriorityColor = (priority) => {
@@ -59,21 +55,6 @@ const Tickets = () => {
         return "text-gray-700 bg-gray-100";
       default:
         return "text-gray-700 bg-gray-100";
-    }
-  };
-
-  const getStatusIcon = (status) => {
-    switch (status?.toLowerCase()) {
-      case "open":
-        return <AlertCircle size={14} />;
-      case "in progress":
-        return <Clock size={14} />;
-      case "resolved":
-        return <CheckCircle size={14} />;
-      case "closed":
-        return <XCircle size={14} />;
-      default:
-        return <AlertCircle size={14} />;
     }
   };
 
@@ -127,7 +108,7 @@ const Tickets = () => {
 
       const assignedToMatch =
         !ticketFilters.assignedTo ||
-        ticket.assigned_to === ticketFilters.assignedTo;
+        ticket.assignee_id === ticketFilters.assignedTo;
 
       const tagsMatch =
         !ticketFilters.tag ||
@@ -168,9 +149,28 @@ const Tickets = () => {
     setSelectedTicket(ticket);
   };
 
+  const handleCreateTicket = async (ticketData) => {
+    try {
+      console.log("Creating ticket:", ticketData);
+
+      // Call the createTicket function from AppContext
+      await createTicket(ticketData);
+
+      // Close the modal
+      setShowNewTicketModal(false);
+
+      // Refresh the tickets list
+      await refreshData();
+    } catch (error) {
+      console.error("Error creating ticket:", error);
+      throw error;
+    }
+  };
+
   // TicketListItem component using Bootstrap classes
   const TicketListItem = ({ ticket }) => {
-    const assignedUser = users.find((u) => u.id === ticket.assigned_to);
+    const assignedUser = users.find((u) => u.id === ticket.assignee_id);
+    const requesterUser = users.find((u) => u.id === ticket.requester_id);
 
     return (
       <div
@@ -183,11 +183,6 @@ const Tickets = () => {
               <span className="ticket-id-modern me-3">
                 {ticket.id || `TKT-${ticket.id}`}
               </span>
-              <div
-                className={`priority-dot priority-${
-                  ticket.priority?.toLowerCase() || "medium"
-                }`}
-              />
             </div>
             <h3 className="ticket-title-modern">{ticket.title}</h3>
           </div>
@@ -196,15 +191,16 @@ const Tickets = () => {
               ticket.status?.toLowerCase().replace(" ", "-") || "open"
             }`}
           >
-            {getStatusIcon(ticket.status)}
-            <span className="ms-1">{ticket.status}</span>
+            <span>{ticket.status}</span>
           </div>
         </div>
 
         <div className="d-flex align-items-center ticket-meta mb-3">
           <User size={14} className="me-1" />
           <span className="me-4">
-            {assignedUser ? assignedUser.name : "Unassigned"}
+            {assignedUser
+              ? `${assignedUser.firstName} ${assignedUser.lastName}`
+              : "Unassigned"}
           </span>
           <Clock size={14} className="me-1" />
           <span>{new Date(ticket.updated_at).toLocaleDateString()}</span>
@@ -213,7 +209,10 @@ const Tickets = () => {
         <div className="d-flex justify-content-between align-items-center ticket-footer">
           <span className="ticket-category">{ticket.type || "General"}</span>
           <span className="ticket-assignee">
-            Assigned to {assignedUser ? assignedUser.name : "Unassigned"}
+            Assigned to{" "}
+            {assignedUser
+              ? `${assignedUser.firstName} ${assignedUser.lastName}`
+              : "Unassigned"}
           </span>
         </div>
       </div>
@@ -222,26 +221,21 @@ const Tickets = () => {
 
   // TicketCard component using Bootstrap classes
   const TicketCard = ({ ticket }) => {
-    const assignedUser = users.find((u) => u.id === ticket.assigned_to);
+    const assignedUser = users.find((u) => u.id === ticket.assignee_id);
+    const requesterUser = users.find((u) => u.id === ticket.requester_id);
 
     return (
       <div
         onClick={() => handleTicketClick(ticket)}
         className="ticket-card-modern"
       >
-        <div className="d-flex justify-content-between align-items-start mb-4">
-          <div
-            className={`priority-dot-large priority-${
-              ticket.priority?.toLowerCase() || "medium"
-            }`}
-          />
+        <div className="d-flex justify-content-end align-items-start mb-4">
           <div
             className={`status-badge status-${
               ticket.status?.toLowerCase().replace(" ", "-") || "open"
             }`}
           >
-            {getStatusIcon(ticket.status)}
-            <span className="ms-1">{ticket.status}</span>
+            <span>{ticket.status}</span>
           </div>
         </div>
 
@@ -255,7 +249,9 @@ const Tickets = () => {
         <div className="d-flex align-items-center mb-3">
           <User size={12} className="me-2" />
           <span className="ticket-card-meta">
-            {assignedUser ? assignedUser.name : "Unassigned"}
+            {requesterUser
+              ? `${requesterUser.firstName} ${requesterUser.lastName}`
+              : "No Requester"}
           </span>
         </div>
 
@@ -271,7 +267,10 @@ const Tickets = () => {
             {ticket.type || "General"}
           </div>
           <div className="ticket-card-assignee">
-            {assignedUser ? assignedUser.name : "Unassigned"}
+            Assigned to{" "}
+            {assignedUser
+              ? `${assignedUser.firstName} ${assignedUser.lastName}`
+              : "Unassigned"}
           </div>
         </div>
       </div>
@@ -304,6 +303,15 @@ const Tickets = () => {
         <div className="d-flex justify-content-between align-items-center">
           <h1 className="tickets-title">Tickets</h1>
           <div className="d-flex align-items-center">
+            {/* New Ticket Button */}
+            <button
+              className="btn btn-primary me-3"
+              onClick={() => setShowNewTicketModal(true)}
+            >
+              <Plus size={16} className="me-2" />
+              New Ticket
+            </button>
+
             {/* View Toggle */}
             <div className="view-toggle-modern me-3">
               <button
@@ -355,6 +363,18 @@ const Tickets = () => {
           ticket={selectedTicket}
           onClose={() => setSelectedTicket(null)}
           users={users}
+          releases={releases}
+          onUpdateTicket={updateTicket}
+          onRefreshData={refreshData}
+        />
+      )}
+
+      {showNewTicketModal && (
+        <NewTicketModal
+          onClose={() => setShowNewTicketModal(false)}
+          users={users}
+          releases={releases}
+          onCreateTicket={handleCreateTicket}
         />
       )}
     </div>

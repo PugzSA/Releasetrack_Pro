@@ -9,13 +9,34 @@ import {
   XCircle,
 } from "lucide-react";
 
-const TicketModal = ({ ticket, onClose, users }) => {
+const TicketModal = ({
+  ticket,
+  onClose,
+  users,
+  releases,
+  onUpdateTicket,
+  onRefreshData,
+}) => {
   if (!ticket) return null;
 
   // State for dynamic priority to update the dot color
   const [selectedPriority, setSelectedPriority] = useState(
     ticket.priority || "Medium"
   );
+
+  // State for all editable form fields
+  const [formData, setFormData] = useState({
+    title: ticket.title || "",
+    requester_id: ticket.requester_id || "",
+    assignee_id: ticket.assignee_id || "",
+    supportArea: ticket.supportArea || "CRM",
+    type: ticket.type || "Issue",
+    priority: ticket.priority || "Medium",
+    status: ticket.status || "Backlog",
+    release_id: ticket.release_id || "",
+    description: ticket.description || "",
+    testNotes: ticket.testNotes || "",
+  });
 
   // Ref and state for modern scrollbar behavior
   const modalRef = useRef(null);
@@ -69,10 +90,52 @@ const TicketModal = ({ ticket, onClose, users }) => {
   };
 
   const handlePriorityChange = (event) => {
-    setSelectedPriority(event.target.value);
+    const newPriority = event.target.value;
+    setSelectedPriority(newPriority);
+    setFormData((prev) => ({ ...prev, priority: newPriority }));
+  };
+
+  const handleInputChange = (field, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    try {
+      // Map form data to database field names
+      const updateData = {
+        title: formData.title,
+        requester_id: formData.requester_id,
+        assignee_id: formData.assignee_id,
+        supportArea: formData.supportArea,
+        type: formData.type,
+        priority: formData.priority,
+        status: formData.status,
+        release_id: formData.release_id,
+        description: formData.description,
+        testNotes: formData.testNotes,
+      };
+
+      console.log("Updating ticket:", { id: ticket.id, updateData });
+
+      // Call the update ticket API
+      await onUpdateTicket(ticket.id, updateData);
+
+      // Refresh the data
+      await onRefreshData();
+
+      alert("Ticket updated successfully!");
+      onClose();
+    } catch (error) {
+      console.error("Error updating ticket:", error);
+      alert("Error updating ticket. Please try again.");
+    }
   };
 
   const assignedUser = users.find((u) => u.id === ticket.assigned_to);
+  const assignedRelease = releases?.find((r) => r.id === ticket.release_id);
 
   return (
     <div className="ticket-modal-backdrop" onClick={onClose}>
@@ -94,7 +157,14 @@ const TicketModal = ({ ticket, onClose, users }) => {
                   {ticket.id || `TKT-${ticket.id}`}
                 </h1>
               </div>
-              <span className="ticket-modal-id">{ticket.title}</span>
+              <input
+                type="text"
+                className="ticket-modal-textarea"
+                placeholder="Enter ticket title..."
+                value={formData.title}
+                onChange={(e) => handleInputChange("title", e.target.value)}
+                style={{ minHeight: "40px", resize: "none" }}
+              />
             </div>
           </div>
         </div>
@@ -108,18 +178,43 @@ const TicketModal = ({ ticket, onClose, users }) => {
                 <label className="ticket-modal-label">Requester:</label>
                 <div className="d-flex align-items-center">
                   <User size={16} className="me-2 text-muted" />
-                  <span className="ticket-modal-value">
-                    {assignedUser ? assignedUser.name : "Unassigned"}
-                  </span>
+                  <select
+                    className="ticket-modal-select-with-icon"
+                    value={formData.requester_id}
+                    onChange={(e) =>
+                      handleInputChange("requester_id", e.target.value)
+                    }
+                  >
+                    <option value="">Select Requester</option>
+                    {users.map((user) => (
+                      <option key={user.id} value={user.id}>
+                        {user.firstName} {user.lastName}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
             </div>
             <div className="col-md-6">
               <div className="ticket-modal-field">
                 <label className="ticket-modal-label">Assignee:</label>
-                <span className="ticket-modal-value">
-                  {assignedUser ? assignedUser.name : "Unassigned"}
-                </span>
+                <div className="d-flex align-items-center">
+                  <User size={16} className="me-2 text-muted" />
+                  <select
+                    className="ticket-modal-select-with-icon"
+                    value={formData.assignee_id}
+                    onChange={(e) =>
+                      handleInputChange("assignee_id", e.target.value)
+                    }
+                  >
+                    <option value="">Unassigned</option>
+                    {users.map((user) => (
+                      <option key={user.id} value={user.id}>
+                        {user.firstName} {user.lastName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
           </div>
@@ -131,7 +226,10 @@ const TicketModal = ({ ticket, onClose, users }) => {
                 <label className="ticket-modal-label">Support Area:</label>
                 <select
                   className="ticket-modal-select"
-                  defaultValue={ticket.support_area || "CRM"}
+                  value={formData.supportArea}
+                  onChange={(e) =>
+                    handleInputChange("supportArea", e.target.value)
+                  }
                 >
                   <option value="CRM">CRM</option>
                   <option value="Customer Support">Customer Support</option>
@@ -144,7 +242,8 @@ const TicketModal = ({ ticket, onClose, users }) => {
                 <label className="ticket-modal-label">Type:</label>
                 <select
                   className="ticket-modal-select"
-                  defaultValue={ticket.type || "Issue"}
+                  value={formData.type}
+                  onChange={(e) => handleInputChange("type", e.target.value)}
                 >
                   <option value="Enhancement">Enhancement</option>
                   <option value="Issue">Issue</option>
@@ -181,7 +280,8 @@ const TicketModal = ({ ticket, onClose, users }) => {
                 <label className="ticket-modal-label">Status:</label>
                 <select
                   className="ticket-modal-select"
-                  defaultValue={ticket.status || "Backlog"}
+                  value={formData.status}
+                  onChange={(e) => handleInputChange("status", e.target.value)}
                 >
                   <option value="Backlog">Backlog</option>
                   <option value="Cancelled">Cancelled</option>
@@ -208,9 +308,21 @@ const TicketModal = ({ ticket, onClose, users }) => {
             <div className="col-md-6">
               <div className="ticket-modal-field">
                 <label className="ticket-modal-label">Release:</label>
-                <span className="ticket-modal-value">
-                  {ticket.release || "Not assigned"}
-                </span>
+                <select
+                  className="ticket-modal-select"
+                  value={formData.release_id}
+                  onChange={(e) =>
+                    handleInputChange("release_id", e.target.value)
+                  }
+                >
+                  <option value="">No Release</option>
+                  {releases &&
+                    releases.map((release) => (
+                      <option key={release.id} value={release.id}>
+                        {release.name}
+                      </option>
+                    ))}
+                </select>
               </div>
             </div>
           </div>
@@ -222,7 +334,8 @@ const TicketModal = ({ ticket, onClose, users }) => {
               className="ticket-modal-textarea"
               rows="4"
               placeholder="Enter ticket description..."
-              defaultValue={ticket.description || ""}
+              value={formData.description}
+              onChange={(e) => handleInputChange("description", e.target.value)}
             />
           </div>
 
@@ -233,7 +346,8 @@ const TicketModal = ({ ticket, onClose, users }) => {
               className="ticket-modal-textarea"
               rows="4"
               placeholder="Add any notes related to testing requirements or results"
-              defaultValue={ticket.test_notes || ""}
+              value={formData.testNotes}
+              onChange={(e) => handleInputChange("testNotes", e.target.value)}
             />
           </div>
 
@@ -258,7 +372,9 @@ const TicketModal = ({ ticket, onClose, users }) => {
           <button className="btn btn-outline-secondary me-2" onClick={onClose}>
             Close
           </button>
-          <button className="btn btn-primary">Update Status</button>
+          <button className="btn btn-primary" onClick={handleSubmit}>
+            Update
+          </button>
         </div>
       </div>
     </div>
