@@ -19,6 +19,9 @@ import {
   Bug,
   Lightbulb,
   MessageSquare,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
 import "./Tickets.css";
 
@@ -63,6 +66,7 @@ const Tickets = () => {
   const [showNewTicketModal, setShowNewTicketModal] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
+  const [sortOrder, setSortOrder] = useState("desc"); // 'desc' for newest first, 'asc' for oldest first
 
   // Global toast state
   const [notification, setNotification] = useState({
@@ -103,7 +107,8 @@ const Tickets = () => {
   const filteredTickets = useMemo(() => {
     if (!ticketFilters || !tickets) return [];
 
-    return tickets.filter((ticket) => {
+    // First filter the tickets
+    const filtered = tickets.filter((ticket) => {
       const searchTermMatch =
         !ticketFilters.searchTerm ||
         ticket.title
@@ -156,7 +161,19 @@ const Tickets = () => {
         tagsMatch
       );
     });
-  }, [tickets, ticketFilters]);
+
+    // Then sort by created_at date
+    return filtered.sort((a, b) => {
+      const dateA = new Date(a.created_at);
+      const dateB = new Date(b.created_at);
+
+      if (sortOrder === "desc") {
+        return dateB - dateA; // Newest first
+      } else {
+        return dateA - dateB; // Oldest first
+      }
+    });
+  }, [tickets, ticketFilters, sortOrder]);
 
   const handleTicketClick = (ticket) => {
     setSelectedTicket(ticket);
@@ -197,6 +214,11 @@ const Tickets = () => {
     return Object.values(ticketFilters).filter((value) => value && value !== "")
       .length;
   }, [ticketFilters]);
+
+  // Handle sort toggle
+  const handleSortToggle = () => {
+    setSortOrder((prevOrder) => (prevOrder === "desc" ? "asc" : "desc"));
+  };
 
   const handleCreateTicket = async (ticketData) => {
     try {
@@ -383,6 +405,22 @@ const Tickets = () => {
             >
               <Plus size={16} className="me-2" />
               New Ticket
+            </button>
+
+            {/* Sort Button */}
+            <button
+              className="btn btn-outline-secondary me-3"
+              onClick={handleSortToggle}
+              title={`Sort by created date ${
+                sortOrder === "desc" ? "ascending" : "descending"
+              }`}
+            >
+              {sortOrder === "desc" ? (
+                <ArrowDown size={16} className="me-2" />
+              ) : (
+                <ArrowUp size={16} className="me-2" />
+              )}
+              {sortOrder === "desc" ? "Newest First" : "Oldest First"}
             </button>
 
             {/* View Toggle */}
