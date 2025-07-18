@@ -31,7 +31,7 @@ export const AppProvider = ({ children }) => {
       supportArea: "",
       type: "",
       priority: "",
-      status: "",
+      status: [], // Changed to array for multi-select
       requester_id: "",
       assignee_id: "",
       release_id: "",

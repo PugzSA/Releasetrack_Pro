@@ -123,7 +123,11 @@ const Tickets = () => {
       const priorityMatch =
         !ticketFilters.priority || ticket.priority === ticketFilters.priority;
       const statusMatch =
-        !ticketFilters.status || ticket.status === ticketFilters.status;
+        !ticketFilters.status ||
+        (Array.isArray(ticketFilters.status)
+          ? ticketFilters.status.length === 0 ||
+            ticketFilters.status.includes(ticket.status)
+          : ticket.status === ticketFilters.status);
       const supportAreaMatch =
         !ticketFilters.supportArea ||
         ticket.supportArea === ticketFilters.supportArea;
@@ -199,7 +203,7 @@ const Tickets = () => {
         supportArea: "",
         type: "",
         priority: "",
-        status: "",
+        status: [], // Clear to empty array
         requester_id: "",
         assignee_id: "",
         release_id: "",
@@ -211,8 +215,12 @@ const Tickets = () => {
   // Count active filters for the main component
   const activeFilterCount = useMemo(() => {
     if (!ticketFilters) return 0;
-    return Object.values(ticketFilters).filter((value) => value && value !== "")
-      .length;
+    return Object.values(ticketFilters).filter((value) => {
+      if (Array.isArray(value)) {
+        return value.length > 0;
+      }
+      return value && value !== "";
+    }).length;
   }, [ticketFilters]);
 
   // Handle sort toggle
@@ -549,6 +557,9 @@ const Tickets = () => {
           users={users}
           releases={releases}
           tickets={tickets}
+          savedFilters={savedFilters}
+          onSaveFilter={saveFilter}
+          onDeleteSavedFilter={deleteSavedFilter}
         />
       )}
 

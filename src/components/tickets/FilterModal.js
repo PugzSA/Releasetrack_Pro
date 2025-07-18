@@ -10,6 +10,9 @@ import {
   AlertCircle,
   Calendar,
   CheckCircle,
+  FolderOpen,
+  Bookmark,
+  Trash2,
 } from "lucide-react";
 import {
   TICKET_TYPES,
@@ -28,6 +31,9 @@ const FilterModal = ({
   users = [],
   releases = [],
   tickets = [],
+  savedFilters = [],
+  onSaveFilter,
+  onDeleteSavedFilter,
 }) => {
   // Local state for filter form
   const [localFilters, setLocalFilters] = useState({
@@ -36,7 +42,7 @@ const FilterModal = ({
     supportArea: "",
     type: "",
     priority: "",
-    status: "",
+    status: [], // Changed to array for multi-select
     release_id: "",
   });
 
@@ -52,6 +58,11 @@ const FilterModal = ({
     assignee: false,
   });
 
+  // Save/Load filter states
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [showLoadDropdown, setShowLoadDropdown] = useState(false);
+  const [filterName, setFilterName] = useState("");
+
   // Initialize local filters when modal opens or filters prop changes
   useEffect(() => {
     if (isOpen && filters) {
@@ -61,7 +72,11 @@ const FilterModal = ({
         supportArea: filters.supportArea || "",
         type: filters.type || "",
         priority: filters.priority || "",
-        status: filters.status || "",
+        status: Array.isArray(filters.status)
+          ? filters.status
+          : filters.status
+          ? [filters.status]
+          : [],
         release_id: filters.release_id || "",
       });
     }
@@ -72,6 +87,11 @@ const FilterModal = ({
   const types = TICKET_TYPES;
   const priorities = TICKET_PRIORITIES;
   const statuses = TICKET_STATUSES;
+
+  // Filter saved filters to only show ticket filters
+  const ticketSavedFilters = savedFilters.filter(
+    (filter) => filter.filter_type === "tickets"
+  );
 
   // Filter users based on search term
   const getFilteredUsers = (searchTerm) => {
@@ -90,6 +110,28 @@ const FilterModal = ({
       ...prev,
       [field]: value,
     }));
+  };
+
+  // Handle multi-select changes (for status field)
+  const handleMultiSelectChange = (field, value) => {
+    setLocalFilters((prev) => {
+      const currentValues = prev[field] || [];
+      const isSelected = currentValues.includes(value);
+
+      if (isSelected) {
+        // Remove the value
+        return {
+          ...prev,
+          [field]: currentValues.filter((item) => item !== value),
+        };
+      } else {
+        // Add the value
+        return {
+          ...prev,
+          [field]: [...currentValues, value],
+        };
+      }
+    });
   };
 
   // Handle search term changes
@@ -135,7 +177,7 @@ const FilterModal = ({
       supportArea: "",
       type: "",
       priority: "",
-      status: "",
+      status: [], // Clear to empty array
       release_id: "",
     };
     setLocalFilters(clearedFilters);
@@ -151,7 +193,64 @@ const FilterModal = ({
   };
 
   // Count active filters
-  const activeFilterCount = Object.values(localFilters).filter(Boolean).length;
+  const activeFilterCount = Object.values(localFilters).filter((value) => {
+    if (Array.isArray(value)) {
+      return value.length > 0;
+    }
+    return Boolean(value);
+  }).length;
+
+  // Handle save filter
+  const handleSaveFilter = () => {
+    if (activeFilterCount === 0) {
+      alert("Please set some filters before saving.");
+      return;
+    }
+    setShowSaveModal(true);
+  };
+
+  // Handle save filter confirm
+  const handleSaveFilterConfirm = async () => {
+    if (!filterName.trim()) {
+      alert("Please enter a name for the filter.");
+      return;
+    }
+
+    try {
+      const filterToSave = {
+        name: filterName.trim(),
+        filter_type: "tickets",
+        filter_criteria: JSON.stringify(localFilters),
+      };
+
+      await onSaveFilter(filterToSave);
+      setFilterName("");
+      setShowSaveModal(false);
+    } catch (error) {
+      console.error("Error saving filter:", error);
+      alert("Failed to save filter. Please try again.");
+    }
+  };
+
+  // Handle load saved filter
+  const handleLoadSavedFilter = (savedFilter) => {
+    try {
+      const parsedFilters = JSON.parse(savedFilter.filter_criteria);
+      setLocalFilters(parsedFilters);
+      setShowLoadDropdown(false);
+    } catch (error) {
+      console.error("Error loading saved filter:", error);
+      alert("Failed to load saved filter. The filter data may be corrupted.");
+    }
+  };
+
+  // Handle delete saved filter
+  const handleDeleteSavedFilter = (filterId, e) => {
+    e.stopPropagation();
+    if (window.confirm("Are you sure you want to delete this saved filter?")) {
+      onDeleteSavedFilter(filterId);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -174,6 +273,50 @@ const FilterModal = ({
             <X size={20} />
           </button>
         </div>
+
+        {/* Saved Filters Section */}
+        {ticketSavedFilters.length > 0 && (
+          <div className="saved-filters-section">
+            <div className="saved-filters-header">
+              <button
+                className="btn-load-filters"
+                onClick={() => setShowLoadDropdown(!showLoadDropdown)}
+              >
+                <FolderOpen size={16} className="me-2" />
+                Load Saved Filter ({ticketSavedFilters.length})
+              </button>
+            </div>
+            {showLoadDropdown && (
+              <div className="saved-filters-dropdown">
+                {ticketSavedFilters.map((savedFilter) => (
+                  <div
+                    key={savedFilter.id}
+                    className="saved-filter-item"
+                    onClick={() => handleLoadSavedFilter(savedFilter)}
+                  >
+                    <div className="saved-filter-info">
+                      <span className="saved-filter-name">
+                        {savedFilter.name}
+                      </span>
+                      <span className="saved-filter-date">
+                        {new Date(savedFilter.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <button
+                      className="delete-saved-filter"
+                      onClick={(e) =>
+                        handleDeleteSavedFilter(savedFilter.id, e)
+                      }
+                      title="Delete saved filter"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Content */}
         <div className="filter-modal-content">
@@ -376,24 +519,56 @@ const FilterModal = ({
               </select>
             </div>
 
-            {/* Status Filter */}
+            {/* Status Filter - Multi-Select */}
             <div className="filter-group">
               <label className="filter-label">
                 <CheckCircle size={16} className="me-2" />
-                Status
+                Status ({localFilters.status.length} selected)
               </label>
-              <select
-                className="filter-select"
-                value={localFilters.status}
-                onChange={(e) => handleFilterChange("status", e.target.value)}
-              >
-                <option value="">All Statuses</option>
-                {statuses.map((status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </select>
+              <div className="filter-multi-select">
+                <div className="multi-select-header">
+                  <span className="multi-select-placeholder">
+                    {localFilters.status.length === 0
+                      ? "Select statuses..."
+                      : `${localFilters.status.length} status${
+                          localFilters.status.length !== 1 ? "es" : ""
+                        } selected`}
+                  </span>
+                </div>
+                <div className="multi-select-options">
+                  {statuses.map((status) => (
+                    <label key={status} className="multi-select-option">
+                      <input
+                        type="checkbox"
+                        checked={localFilters.status.includes(status)}
+                        onChange={() =>
+                          handleMultiSelectChange("status", status)
+                        }
+                      />
+                      <span className="checkmark"></span>
+                      <span className="option-text">{status}</span>
+                    </label>
+                  ))}
+                </div>
+                {localFilters.status.length > 0 && (
+                  <div className="selected-items">
+                    {localFilters.status.map((status) => (
+                      <span key={status} className="selected-item">
+                        {status}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleMultiSelectChange("status", status)
+                          }
+                          className="remove-item"
+                        >
+                          <X size={12} />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Release Filter */}
@@ -427,6 +602,14 @@ const FilterModal = ({
               <RotateCcw size={16} className="me-2" />
               Clear All
             </button>
+            <button
+              className="btn-filter-save"
+              onClick={handleSaveFilter}
+              disabled={activeFilterCount === 0}
+            >
+              <Save size={16} className="me-2" />
+              Save Filter
+            </button>
           </div>
           <div className="filter-actions-right">
             <button className="btn-filter-cancel" onClick={onClose}>
@@ -444,6 +627,55 @@ const FilterModal = ({
           </div>
         </div>
       </div>
+
+      {/* Save Filter Name Modal */}
+      {showSaveModal && (
+        <div
+          className="save-filter-modal-overlay"
+          onClick={() => setShowSaveModal(false)}
+        >
+          <div
+            className="save-filter-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="save-filter-modal-header">
+              <h3>Save Filter</h3>
+              <button onClick={() => setShowSaveModal(false)}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="save-filter-modal-content">
+              <label>Filter Name:</label>
+              <input
+                type="text"
+                value={filterName}
+                onChange={(e) => setFilterName(e.target.value)}
+                placeholder="Enter a name for this filter..."
+                autoFocus
+                onKeyPress={(e) =>
+                  e.key === "Enter" && handleSaveFilterConfirm()
+                }
+              />
+            </div>
+            <div className="save-filter-modal-footer">
+              <button
+                className="btn-cancel"
+                onClick={() => setShowSaveModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn-save"
+                onClick={handleSaveFilterConfirm}
+                disabled={!filterName.trim()}
+              >
+                <Save size={16} className="me-2" />
+                Save Filter
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
