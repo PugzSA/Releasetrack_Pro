@@ -9,19 +9,26 @@ import {
   XCircle,
 } from "lucide-react";
 
-const NewTicketModal = ({ onClose, users, releases, onCreateTicket }) => {
+const NewTicketModal = ({
+  onClose,
+  users,
+  releases,
+  onCreateTicket,
+  showToast,
+}) => {
   // State for all form fields
   const [formData, setFormData] = useState({
     title: "",
-    requester: "", // This will store the requesterID (user ID)
-    assignee: "", // This will store the assignAnyID (user ID)
-    support_area: "CRM",
+    requester: "", // This will store the requester_id (user ID)
+    assignee: "", // This will store the assignee_id (user ID)
+    supportArea: "CRM",
     type: "Issue",
     priority: "Medium",
     status: "Backlog",
     release_id: "", // This will store the release ID
     description: "",
-    test_notes: "",
+    solutionNotes: "",
+    testNotes: "",
     tags: [],
   });
 
@@ -91,21 +98,38 @@ const NewTicketModal = ({ onClose, users, releases, onCreateTicket }) => {
     }
 
     try {
-      // Map form data to database field names
+      // Map form data to database field names with proper type conversion
       const ticketData = {
-        ...formData,
-        requesterID: formData.requester, // Map to database field name
-        assignAnyID: formData.assignee, // Map to database field name
-        // Remove the frontend field names
-        requester: undefined,
-        assignee: undefined,
+        title: formData.title,
+        description: formData.description,
+        type: formData.type,
+        priority: formData.priority,
+        status: formData.status,
+        supportArea: formData.supportArea,
+        solutionnotes: formData.solutionNotes,
+        testNotes: formData.testNotes,
+        release_id: formData.release_id ? parseInt(formData.release_id) : null,
+        requester_id: formData.requester ? parseInt(formData.requester) : null,
+        assignee_id: formData.assignee ? parseInt(formData.assignee) : null,
       };
 
       await onCreateTicket(ticketData);
-      onClose();
+
+      // Show success toast using parent component's toast system
+      if (showToast) {
+        showToast("Ticket created successfully!", "success");
+      }
+
+      // Auto-close modal after a short delay to show the toast
+      setTimeout(() => {
+        onClose();
+      }, 1500); // Close after 1.5 seconds to give time to see the toast
     } catch (error) {
       console.error("Error creating ticket:", error);
-      alert("Error creating ticket. Please try again.");
+      // Show error toast using parent component's toast system
+      if (showToast) {
+        showToast("Error creating ticket. Please try again.", "danger");
+      }
     }
   };
 
@@ -196,9 +220,9 @@ const NewTicketModal = ({ onClose, users, releases, onCreateTicket }) => {
                 <label className="ticket-modal-label">Support Area:</label>
                 <select
                   className="ticket-modal-select"
-                  value={formData.support_area}
+                  value={formData.supportArea}
                   onChange={(e) =>
-                    handleInputChange("support_area", e.target.value)
+                    handleInputChange("supportArea", e.target.value)
                   }
                 >
                   <option value="CRM">CRM</option>
@@ -316,6 +340,20 @@ const NewTicketModal = ({ onClose, users, releases, onCreateTicket }) => {
             />
           </div>
 
+          {/* Solution Notes */}
+          <div className="ticket-modal-field mb-4">
+            <label className="ticket-modal-label">Solution Notes:</label>
+            <textarea
+              className="ticket-modal-textarea"
+              rows="4"
+              placeholder="Add any notes related to the solution of this ticket"
+              value={formData.solutionNotes}
+              onChange={(e) =>
+                handleInputChange("solutionNotes", e.target.value)
+              }
+            />
+          </div>
+
           {/* Test Notes */}
           <div className="ticket-modal-field mb-4">
             <label className="ticket-modal-label">Test Notes:</label>
@@ -323,8 +361,8 @@ const NewTicketModal = ({ onClose, users, releases, onCreateTicket }) => {
               className="ticket-modal-textarea"
               rows="4"
               placeholder="Add any notes related to testing requirements or results"
-              value={formData.test_notes}
-              onChange={(e) => handleInputChange("test_notes", e.target.value)}
+              value={formData.testNotes}
+              onChange={(e) => handleInputChange("testNotes", e.target.value)}
             />
           </div>
         </div>

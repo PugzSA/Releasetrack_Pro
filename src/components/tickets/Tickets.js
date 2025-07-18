@@ -1,10 +1,43 @@
 import React, { useState, useEffect, useMemo } from "react";
 import TicketModal from "./TicketModal";
 import NewTicketModal from "./NewTicketModal";
+import SearchModal from "./SearchModal";
 import UserAvatar from "../common/UserAvatar";
+import NotificationToast from "../common/NotificationToast";
 import { useApp } from "../../context/AppContext";
-import { Search, Filter, User, Clock, List, Grid, Plus } from "lucide-react";
+import { getStatusClass } from "../../utils/statusUtils";
+import {
+  Search,
+  Filter,
+  User,
+  Clock,
+  List,
+  Grid,
+  Plus,
+  TrendingUp,
+  Bug,
+  Lightbulb,
+  MessageSquare,
+} from "lucide-react";
 import "./Tickets.css";
+
+// Function to get the appropriate icon for ticket type
+const getTicketTypeIcon = (ticketType, size = 16) => {
+  const iconProps = { size, className: "me-2" };
+
+  switch (ticketType?.toLowerCase()) {
+    case "enhancement":
+      return <TrendingUp {...iconProps} className="me-2 text-primary" />;
+    case "issue":
+      return <Bug {...iconProps} className="me-2 text-danger" />;
+    case "new feature":
+      return <Lightbulb {...iconProps} className="me-2 text-success" />;
+    case "request":
+      return <MessageSquare {...iconProps} className="me-2 text-info" />;
+    default:
+      return <MessageSquare {...iconProps} className="me-2 text-secondary" />;
+  }
+};
 
 const Tickets = () => {
   const {
@@ -27,6 +60,23 @@ const Tickets = () => {
   const [viewMode, setViewMode] = useState("list");
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [showNewTicketModal, setShowNewTicketModal] = useState(false);
+  const [showSearchModal, setShowSearchModal] = useState(false);
+
+  // Global toast state
+  const [notification, setNotification] = useState({
+    show: false,
+    message: "",
+    variant: "success",
+  });
+
+  // Function to show toast notifications
+  const showToast = (message, variant = "success") => {
+    setNotification({
+      show: true,
+      message,
+      variant,
+    });
+  };
 
   // Helper functions matching the example
   const getPriorityColor = (priority) => {
@@ -41,21 +91,6 @@ const Tickets = () => {
         return "bg-green-500";
       default:
         return "bg-gray-500";
-    }
-  };
-
-  const getStatusColor = (status) => {
-    switch (status?.toLowerCase()) {
-      case "open":
-        return "text-blue-700 bg-blue-100";
-      case "in progress":
-        return "text-yellow-700 bg-yellow-100";
-      case "resolved":
-        return "text-green-700 bg-green-100";
-      case "closed":
-        return "text-gray-700 bg-gray-100";
-      default:
-        return "text-gray-700 bg-gray-100";
     }
   };
 
@@ -187,11 +222,7 @@ const Tickets = () => {
             </div>
             <h3 className="ticket-title-modern">{ticket.title}</h3>
           </div>
-          <div
-            className={`status-badge status-${
-              ticket.status?.toLowerCase().replace(" ", "-") || "open"
-            }`}
-          >
+          <div className={`status-badge ${getStatusClass(ticket.status)}`}>
             <span>{ticket.status}</span>
           </div>
         </div>
@@ -199,16 +230,19 @@ const Tickets = () => {
         <div className="d-flex align-items-center ticket-meta mb-3">
           <User size={14} className="me-1" />
           <span className="me-4">
-            {assignedUser
-              ? `${assignedUser.firstName} ${assignedUser.lastName}`
-              : "Unassigned"}
+            {requesterUser
+              ? `${requesterUser.firstName} ${requesterUser.lastName}`
+              : "No Requester"}
           </span>
           <Clock size={14} className="me-1" />
           <span>{new Date(ticket.updated_at).toLocaleDateString()}</span>
         </div>
 
         <div className="d-flex justify-content-between align-items-center ticket-footer">
-          <span className="ticket-category">{ticket.type || "General"}</span>
+          <div className="d-flex align-items-center ticket-category">
+            {getTicketTypeIcon(ticket.type, 14)}
+            <span>{ticket.type || "General"}</span>
+          </div>
           <span className="ticket-assignee">
             Assigned to{" "}
             {assignedUser
@@ -230,42 +264,40 @@ const Tickets = () => {
         onClick={() => handleTicketClick(ticket)}
         className="ticket-card-modern"
       >
-        <div className="d-flex justify-content-end align-items-start mb-4">
-          <div
-            className={`status-badge status-${
-              ticket.status?.toLowerCase().replace(" ", "-") || "open"
-            }`}
-          >
+        <div className="d-flex justify-content-between align-items-start mb-3">
+          <h3 className="ticket-card-id mb-0">
+            {ticket.id || `TKT-${ticket.id}`}
+          </h3>
+          <div className={`status-badge ${getStatusClass(ticket.status)}`}>
             <span>{ticket.status}</span>
           </div>
         </div>
 
-        <div className="mb-4">
-          <h3 className="ticket-card-id mb-2">
-            {ticket.id || `TKT-${ticket.id}`}
-          </h3>
+        <div className="mb-3">
           <p className="ticket-card-title">{ticket.title}</p>
         </div>
 
-        <div className="d-flex align-items-center mb-3">
-          <User size={12} className="me-2" />
-          <span className="ticket-card-meta">
-            {requesterUser
-              ? `${requesterUser.firstName} ${requesterUser.lastName}`
-              : "No Requester"}
-          </span>
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <div className="d-flex align-items-center">
+            <User size={12} className="me-2" />
+            <span className="ticket-card-meta">
+              {requesterUser
+                ? `${requesterUser.firstName} ${requesterUser.lastName}`
+                : "No Requester"}
+            </span>
+          </div>
+          <div className="d-flex align-items-center">
+            <Clock size={12} className="me-2" />
+            <span className="ticket-card-meta">
+              {new Date(ticket.updated_at).toLocaleDateString()}
+            </span>
+          </div>
         </div>
 
-        <div className="d-flex align-items-center mb-4">
-          <Clock size={12} className="me-2" />
-          <span className="ticket-card-meta">
-            {new Date(ticket.updated_at).toLocaleDateString()}
-          </span>
-        </div>
-
-        <div className="ticket-card-footer">
-          <div className="ticket-card-category mb-2">
-            {ticket.type || "General"}
+        <div className="d-flex justify-content-between align-items-center">
+          <div className="d-flex align-items-center ticket-card-category">
+            {getTicketTypeIcon(ticket.type, 14)}
+            <span>{ticket.type || "General"}</span>
           </div>
           <div className="ticket-card-assignee">
             Assigned to{" "}
@@ -332,7 +364,11 @@ const Tickets = () => {
             </div>
 
             {/* Search and Filter Icons */}
-            <button className="btn btn-icon me-2">
+            <button
+              className="btn btn-icon me-2"
+              onClick={() => setShowSearchModal(true)}
+              title="Search tickets"
+            >
               <Search size={20} />
             </button>
             <button className="btn btn-icon me-3">
@@ -370,6 +406,7 @@ const Tickets = () => {
           releases={releases}
           onUpdateTicket={updateTicket}
           onRefreshData={refreshData}
+          showToast={showToast}
         />
       )}
 
@@ -379,8 +416,27 @@ const Tickets = () => {
           users={users}
           releases={releases}
           onCreateTicket={handleCreateTicket}
+          showToast={showToast}
         />
       )}
+
+      {showSearchModal && (
+        <SearchModal
+          isOpen={showSearchModal}
+          onClose={() => setShowSearchModal(false)}
+          tickets={tickets}
+          users={users}
+          onTicketSelect={(ticket) => setSelectedTicket(ticket)}
+        />
+      )}
+
+      {/* Global Toast Notification */}
+      <NotificationToast
+        show={notification.show}
+        message={notification.message}
+        variant={notification.variant}
+        onClose={() => setNotification({ ...notification, show: false })}
+      />
     </div>
   );
 };

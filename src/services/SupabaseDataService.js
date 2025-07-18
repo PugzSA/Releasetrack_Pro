@@ -178,6 +178,29 @@ class SupabaseDataService {
 
   async createTicket(ticketData) {
     try {
+      // Generate a unique ticket ID if not provided
+      if (!ticketData.id) {
+        // Get the highest existing ticket number
+        const { data: existingTickets, error: fetchError } = await supabase
+          .from("tickets")
+          .select("id")
+          .like("id", "SUP-%")
+          .order("id", { ascending: false })
+          .limit(1);
+
+        if (fetchError) throw fetchError;
+
+        let nextNumber = 1;
+        if (existingTickets && existingTickets.length > 0) {
+          const lastId = existingTickets[0].id;
+          const lastNumber = parseInt(lastId.replace("SUP-", ""));
+          nextNumber = lastNumber + 1;
+        }
+
+        // Format the ID with leading zeros (e.g., SUP-00001)
+        ticketData.id = `SUP-${nextNumber.toString().padStart(5, "0")}`;
+      }
+
       const { data, error } = await supabase
         .from("tickets")
         .insert(ticketData)

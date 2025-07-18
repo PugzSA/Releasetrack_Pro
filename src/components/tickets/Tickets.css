@@ -303,6 +303,10 @@
 .ticket-card-meta {
   font-size: 0.75rem;
   color: #6c757d;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 120px;
 }
 
 .ticket-card-footer {
@@ -313,6 +317,10 @@
 .ticket-card-category {
   font-size: 0.75rem;
   color: #6c757d;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 120px;
 }
 
 .ticket-card-assignee {
@@ -321,6 +329,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  max-width: 140px;
 }
 
 /* Priority Dots */
@@ -389,22 +398,22 @@
   color: #084298;
 }
 
-.status-blocked---user {
+.status-blocked-user {
   background-color: #f8d7da;
   color: #721c24;
 }
 
-.status-blocked---dev {
+.status-blocked-dev {
   background-color: #f8d7da;
   color: #721c24;
 }
 
-.status-in-testing---dev {
+.status-in-testing-dev {
   background-color: #e2e3ff;
   color: #3730a3;
 }
 
-.status-in-testing---uat {
+.status-in-testing-uat {
   background-color: #e2e3ff;
   color: #3730a3;
 }

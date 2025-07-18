@@ -16,6 +16,7 @@ const TicketModal = ({
   releases,
   onUpdateTicket,
   onRefreshData,
+  showToast,
 }) => {
   if (!ticket) return null;
 
@@ -35,6 +36,7 @@ const TicketModal = ({
     status: ticket.status || "Backlog",
     release_id: ticket.release_id || "",
     description: ticket.description || "",
+    solutionNotes: ticket.solutionnotes || "",
     testNotes: ticket.testNotes || "",
   });
 
@@ -104,21 +106,24 @@ const TicketModal = ({
 
   const handleSubmit = async () => {
     try {
-      // Map form data to database field names
+      // Map form data to database field names with proper type conversion
       const updateData = {
         title: formData.title,
-        requester_id: formData.requester_id,
-        assignee_id: formData.assignee_id,
+        requester_id: formData.requester_id
+          ? parseInt(formData.requester_id)
+          : null,
+        assignee_id: formData.assignee_id
+          ? parseInt(formData.assignee_id)
+          : null,
         supportArea: formData.supportArea,
         type: formData.type,
         priority: formData.priority,
         status: formData.status,
-        release_id: formData.release_id,
+        release_id: formData.release_id ? parseInt(formData.release_id) : null,
         description: formData.description,
+        solutionnotes: formData.solutionNotes,
         testNotes: formData.testNotes,
       };
-
-      console.log("Updating ticket:", { id: ticket.id, updateData });
 
       // Call the update ticket API
       await onUpdateTicket(ticket.id, updateData);
@@ -126,11 +131,21 @@ const TicketModal = ({
       // Refresh the data
       await onRefreshData();
 
-      alert("Ticket updated successfully!");
-      onClose();
+      // Show success toast using parent component's toast system
+      if (showToast) {
+        showToast("Ticket updated successfully!", "success");
+      }
+
+      // Auto-close the modal after a short delay to show the toast
+      setTimeout(() => {
+        onClose();
+      }, 1500); // Close after 1.5 seconds to give time to see the toast
     } catch (error) {
       console.error("Error updating ticket:", error);
-      alert("Error updating ticket. Please try again.");
+      // Show error toast using parent component's toast system
+      if (showToast) {
+        showToast("Error updating ticket. Please try again.", "danger");
+      }
     }
   };
 
@@ -336,6 +351,20 @@ const TicketModal = ({
               placeholder="Enter ticket description..."
               value={formData.description}
               onChange={(e) => handleInputChange("description", e.target.value)}
+            />
+          </div>
+
+          {/* Solution Notes */}
+          <div className="ticket-modal-field mb-4">
+            <label className="ticket-modal-label">Solution Notes:</label>
+            <textarea
+              className="ticket-modal-textarea"
+              rows="4"
+              placeholder="Add any notes related to the solution of this ticket"
+              value={formData.solutionNotes}
+              onChange={(e) =>
+                handleInputChange("solutionNotes", e.target.value)
+              }
             />
           </div>
 

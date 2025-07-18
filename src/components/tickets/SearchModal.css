@@ -1,0 +1,275 @@
+/* Search Modal Backdrop */
+.search-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  z-index: 2000;
+  backdrop-filter: blur(4px);
+  padding-top: 10vh;
+}
+
+/* Main Modal Container */
+.search-modal-container {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 600px;
+  max-height: 70vh;
+  overflow: hidden;
+  animation: searchModalSlideIn 0.3s ease-out;
+}
+
+@keyframes searchModalSlideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Header Section */
+.search-modal-header {
+  padding: 24px 24px 16px 24px;
+  border-bottom: 1px solid #f1f3f4;
+}
+
+.search-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 16px;
+  color: #6c757d;
+  z-index: 1;
+}
+
+.search-input {
+  width: 100%;
+  padding: 16px 16px 16px 48px;
+  padding-right: 48px;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  font-size: 16px;
+  background-color: #f8f9fa;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.search-input:focus {
+  border-color: #0d6efd;
+  background-color: white;
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+}
+
+.search-close-btn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  padding: 8px;
+  border-radius: 8px;
+  color: #6c757d;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.search-close-btn:hover {
+  background-color: #f8f9fa;
+  color: #495057;
+}
+
+/* Results Section */
+.search-results {
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+/* Placeholder State */
+.search-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  color: #6c757d;
+}
+
+.placeholder-icon {
+  color: #dee2e6;
+  margin-bottom: 16px;
+}
+
+.search-placeholder p {
+  font-size: 18px;
+  font-weight: 500;
+  margin: 0 0 8px 0;
+  color: #495057;
+}
+
+.search-placeholder span {
+  font-size: 14px;
+  color: #6c757d;
+}
+
+/* No Results State */
+.search-no-results {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  color: #6c757d;
+}
+
+.no-results-icon {
+  color: #dee2e6;
+  margin-bottom: 16px;
+}
+
+.search-no-results p {
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0 0 8px 0;
+  color: #495057;
+}
+
+.search-no-results span {
+  font-size: 14px;
+  color: #6c757d;
+}
+
+/* Results List */
+.search-results-list {
+  padding: 8px 0;
+}
+
+.search-results-header {
+  padding: 12px 24px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6c757d;
+}
+
+/* Individual Result Item */
+.search-result-item {
+  padding: 16px 24px;
+  border-bottom: 1px solid #f1f3f4;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.search-result-item:hover {
+  background-color: #f8f9fa;
+}
+
+.search-result-item:last-child {
+  border-bottom: none;
+}
+
+.search-result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.search-result-id {
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0d6efd;
+}
+
+.search-result-status {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.search-result-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #212529;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.search-result-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.search-result-meta {
+  display: flex;
+  gap: 16px;
+  font-size: 14px;
+  color: #6c757d;
+}
+
+.search-result-type,
+.search-result-priority {
+  text-transform: capitalize;
+}
+
+.search-result-requester {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #6c757d;
+}
+
+.requester-icon {
+  color: #6c757d;
+}
+
+.requester-name {
+  font-weight: 500;
+}
+
+/* Search Highlight */
+.search-highlight {
+  background-color: #fff3cd;
+  color: #664d03;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+/* Custom Scrollbar */
+.search-results::-webkit-scrollbar {
+  width: 6px;
+}
+
+.search-results::-webkit-scrollbar-track {
+  background: #f1f3f4;
+}
+
+.search-results::-webkit-scrollbar-thumb {
+  background: #dee2e6;
+  border-radius: 3px;
+}
+
+.search-results::-webkit-scrollbar-thumb:hover {
+  background: #ced4da;
+}

@@ -148,22 +148,22 @@ body {
   color: #084298;
 }
 
-.status-badge.blocked---user {
+.status-badge.blocked-user {
   background-color: #f8d7da;
   color: #721c24;
 }
 
-.status-badge.blocked---dev {
+.status-badge.blocked-dev {
   background-color: #f8d7da;
   color: #721c24;
 }
 
-.status-badge.in-testing---dev {
+.status-badge.in-testing-dev {
   background-color: #e2e3ff;
   color: #3730a3;
 }
 
-.status-badge.in-testing---uat {
+.status-badge.in-testing-uat {
   background-color: #e2e3ff;
   color: #3730a3;
 }
