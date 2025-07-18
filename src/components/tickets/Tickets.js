@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import TicketModal from "./TicketModal";
 import NewTicketModal from "./NewTicketModal";
 import SearchModal from "./SearchModal";
+import FilterModal from "./FilterModal";
 import UserAvatar from "../common/UserAvatar";
 import NotificationToast from "../common/NotificationToast";
 import { useApp } from "../../context/AppContext";
@@ -61,6 +62,7 @@ const Tickets = () => {
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [showNewTicketModal, setShowNewTicketModal] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
+  const [showFilterModal, setShowFilterModal] = useState(false);
 
   // Global toast state
   const [notification, setNotification] = useState({
@@ -81,10 +83,8 @@ const Tickets = () => {
   // Helper functions matching the example
   const getPriorityColor = (priority) => {
     switch (priority?.toLowerCase()) {
-      case "critical":
-        return "bg-red-500";
       case "high":
-        return "bg-orange-500";
+        return "bg-red-400";
       case "medium":
         return "bg-yellow-500";
       case "low":
@@ -95,28 +95,6 @@ const Tickets = () => {
   };
 
   const ticketFilters = filters?.tickets;
-
-  const ticketTypes = useMemo(
-    () =>
-      tickets
-        ? [...new Set(tickets.map((t) => t.type).filter(Boolean))].sort()
-        : [],
-    [tickets]
-  );
-  const priorities = useMemo(
-    () =>
-      tickets
-        ? [...new Set(tickets.map((t) => t.priority).filter(Boolean))].sort()
-        : [],
-    [tickets]
-  );
-  const statuses = useMemo(
-    () =>
-      tickets
-        ? [...new Set(tickets.map((t) => t.status).filter(Boolean))].sort()
-        : [],
-    [tickets]
-  );
 
   useEffect(() => {
     // Effect logic can remain here
@@ -141,10 +119,25 @@ const Tickets = () => {
         !ticketFilters.priority || ticket.priority === ticketFilters.priority;
       const statusMatch =
         !ticketFilters.status || ticket.status === ticketFilters.status;
+      const supportAreaMatch =
+        !ticketFilters.supportArea ||
+        ticket.supportArea === ticketFilters.supportArea;
+      const releaseMatch =
+        !ticketFilters.release_id ||
+        ticket.release_id === parseInt(ticketFilters.release_id);
 
       const assignedToMatch =
         !ticketFilters.assignedTo ||
         ticket.assignee_id === ticketFilters.assignedTo;
+
+      // New filter fields
+      const requesterMatch =
+        !ticketFilters.requester_id ||
+        ticket.requester_id === parseInt(ticketFilters.requester_id);
+
+      const assigneeMatch =
+        !ticketFilters.assignee_id ||
+        ticket.assignee_id === parseInt(ticketFilters.assignee_id);
 
       const tagsMatch =
         !ticketFilters.tag ||
@@ -155,35 +148,55 @@ const Tickets = () => {
         typeMatch &&
         priorityMatch &&
         statusMatch &&
+        supportAreaMatch &&
+        releaseMatch &&
         assignedToMatch &&
+        requesterMatch &&
+        assigneeMatch &&
         tagsMatch
       );
     });
   }, [tickets, ticketFilters]);
 
-  const handleSearchChange = (e) => {
-    setFilters({
-      ...filters,
-      tickets: {
-        ...ticketFilters,
-        searchTerm: e.target.value,
-      },
-    });
-  };
-
-  const handleFilterChange = (filterType, value) => {
-    setFilters({
-      ...filters,
-      tickets: {
-        ...ticketFilters,
-        [filterType]: value,
-      },
-    });
-  };
-
   const handleTicketClick = (ticket) => {
     setSelectedTicket(ticket);
   };
+
+  // Filter modal handlers
+  const handleApplyFilters = (newFilters) => {
+    setFilters({
+      ...filters,
+      tickets: {
+        ...ticketFilters,
+        ...newFilters,
+      },
+    });
+    showToast("Filters applied successfully", "success");
+  };
+
+  const handleClearFilters = () => {
+    setFilters({
+      ...filters,
+      tickets: {
+        searchTerm: "",
+        supportArea: "",
+        type: "",
+        priority: "",
+        status: "",
+        requester_id: "",
+        assignee_id: "",
+        release_id: "",
+      },
+    });
+    showToast("Filters cleared", "info");
+  };
+
+  // Count active filters for the main component
+  const activeFilterCount = useMemo(() => {
+    if (!ticketFilters) return 0;
+    return Object.values(ticketFilters).filter((value) => value && value !== "")
+      .length;
+  }, [ticketFilters]);
 
   const handleCreateTicket = async (ticketData) => {
     try {
@@ -239,10 +252,29 @@ const Tickets = () => {
         </div>
 
         <div className="d-flex justify-content-between align-items-center ticket-footer">
-          <div className="d-flex align-items-center ticket-category">
-            {getTicketTypeIcon(ticket.type, 14)}
-            <span>{ticket.type || "General"}</span>
+          <div className="d-flex align-items-center gap-3">
+            {/* Type */}
+            <div className="d-flex align-items-center ticket-category">
+              {getTicketTypeIcon(ticket.type, 14)}
+              <span>{ticket.type || "General"}</span>
+            </div>
+
+            {/* Support Area */}
+            {ticket.supportArea && (
+              <div className="d-flex align-items-center ticket-support-area">
+                <span>{ticket.supportArea}</span>
+              </div>
+            )}
+
+            {/* Priority Circle */}
+            <div
+              className={`priority-dot priority-${(
+                ticket.priority || "medium"
+              ).toLowerCase()}`}
+              title={`Priority: ${ticket.priority || "Medium"}`}
+            />
           </div>
+
           <span className="ticket-assignee">
             Assigned to{" "}
             {assignedUser
@@ -295,10 +327,29 @@ const Tickets = () => {
         </div>
 
         <div className="d-flex justify-content-between align-items-center">
-          <div className="d-flex align-items-center ticket-card-category">
-            {getTicketTypeIcon(ticket.type, 14)}
-            <span>{ticket.type || "General"}</span>
+          <div className="d-flex align-items-center gap-3">
+            {/* Type */}
+            <div className="d-flex align-items-center ticket-card-category">
+              {getTicketTypeIcon(ticket.type, 14)}
+              <span>{ticket.type || "General"}</span>
+            </div>
+
+            {/* Support Area */}
+            {ticket.supportArea && (
+              <div className="d-flex align-items-center ticket-card-support-area">
+                <span>{ticket.supportArea}</span>
+              </div>
+            )}
+
+            {/* Priority Circle */}
+            <div
+              className={`priority-dot priority-${(
+                ticket.priority || "medium"
+              ).toLowerCase()}`}
+              title={`Priority: ${ticket.priority || "Medium"}`}
+            />
           </div>
+
           <div className="ticket-card-assignee">
             Assigned to{" "}
             {assignedUser
@@ -309,17 +360,6 @@ const Tickets = () => {
       </div>
     );
   };
-
-  const allTags = useMemo(() => {
-    if (!tickets) return [];
-    const tagSet = new Set();
-    tickets.forEach((ticket) => {
-      if (ticket.tags && Array.isArray(ticket.tags)) {
-        ticket.tags.forEach((tag) => tagSet.add(tag));
-      }
-    });
-    return [...tagSet].sort();
-  }, [tickets]);
 
   if (loading) {
     return (
@@ -371,8 +411,18 @@ const Tickets = () => {
             >
               <Search size={20} />
             </button>
-            <button className="btn btn-icon me-3">
+            <button
+              className="btn btn-icon me-3 position-relative"
+              onClick={() => setShowFilterModal(true)}
+              title="Filter tickets"
+            >
               <Filter size={20} />
+              {activeFilterCount > 0 && (
+                <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary">
+                  {activeFilterCount}
+                  <span className="visually-hidden">active filters</span>
+                </span>
+              )}
             </button>
 
             {/* User Avatar */}
@@ -380,6 +430,27 @@ const Tickets = () => {
           </div>
         </div>
       </div>
+
+      {/* Active Filters Summary */}
+      {activeFilterCount > 0 && (
+        <div className="active-filters-summary mb-3">
+          <div className="d-flex align-items-center justify-content-between">
+            <div className="d-flex align-items-center">
+              <Filter size={16} className="me-2 text-primary" />
+              <span className="text-muted">
+                {activeFilterCount} filter{activeFilterCount !== 1 ? "s" : ""}{" "}
+                applied
+              </span>
+            </div>
+            <button
+              className="btn btn-sm btn-outline-secondary"
+              onClick={handleClearFilters}
+            >
+              Clear All
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Tickets Display */}
       <div className="tickets-content-modern">
@@ -427,6 +498,19 @@ const Tickets = () => {
           tickets={tickets}
           users={users}
           onTicketSelect={(ticket) => setSelectedTicket(ticket)}
+        />
+      )}
+
+      {showFilterModal && (
+        <FilterModal
+          isOpen={showFilterModal}
+          onClose={() => setShowFilterModal(false)}
+          filters={ticketFilters}
+          onApplyFilters={handleApplyFilters}
+          onClearFilters={handleClearFilters}
+          users={users}
+          releases={releases}
+          tickets={tickets}
         />
       )}
 

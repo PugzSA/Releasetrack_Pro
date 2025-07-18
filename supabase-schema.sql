@@ -67,10 +67,10 @@ VALUES
 
 -- Sample tickets
 INSERT INTO tickets (id, title, description, type, priority, status, assignee, release_id)
-VALUES 
-  ('SUP-00001', 'Email not sending', 'Automated emails are not being sent when cases are updated', 'bug', 'high', 'open', 'Jane Doe', 1),
-  ('SUP-00002', 'Add custom field to Account', 'New compliance requirement needs a custom field on Account object', 'enhancement', 'medium', 'in progress', 'John Smith', 1),
-  ('SUP-00003', 'Update validation rule', 'Current validation rule is too restrictive', 'task', 'low', 'completed', 'Alex Johnson', 2);
+VALUES
+  ('SUP-00001', 'Email not sending', 'Automated emails are not being sent when cases are updated', 'Issue', 'High', 'Backlog', 'Jane Doe', 1),
+  ('SUP-00002', 'Add custom field to Account', 'New compliance requirement needs a custom field on Account object', 'Enhancement', 'Medium', 'In Development', 'John Smith', 1),
+  ('SUP-00003', 'Update validation rule', 'Current validation rule is too restrictive', 'Request', 'Low', 'Released', 'Alex Johnson', 2);
 
 -- Sample metadata
 INSERT INTO metadata (name, type, component, status, ticket_id, release_id)
