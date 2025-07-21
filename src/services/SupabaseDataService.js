@@ -109,6 +109,29 @@ class SupabaseDataService {
 
   async createRelease(releaseData) {
     try {
+      // Generate a unique release ID if not provided
+      if (!releaseData.id) {
+        // Get the highest existing release number
+        const { data: existingReleases, error: fetchError } = await supabase
+          .from("releases")
+          .select("id")
+          .like("id", "RELEASE-%")
+          .order("id", { ascending: false })
+          .limit(1);
+
+        if (fetchError) throw fetchError;
+
+        let nextNumber = 1;
+        if (existingReleases && existingReleases.length > 0) {
+          const lastId = existingReleases[0].id;
+          const lastNumber = parseInt(lastId.replace("RELEASE-", ""));
+          nextNumber = lastNumber + 1;
+        }
+
+        // Format the ID (e.g., RELEASE-1, RELEASE-2, etc.)
+        releaseData.id = `RELEASE-${nextNumber}`;
+      }
+
       const { data, error } = await supabase
         .from("releases")
         .insert(releaseData)

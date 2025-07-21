@@ -91,8 +91,8 @@ const EditTicketModal = ({ show, handleClose, ticket, onTicketUpdate }) => {
       // Format the data for submission
       const formattedData = {
         ...formData,
-        // Convert string IDs to numbers
-        release_id: formData.release_id ? parseInt(formData.release_id) : null,
+        // Keep release_id as string (RELEASE-X format)
+        release_id: formData.release_id || null,
         assignee_id: formData.assignee_id
           ? parseInt(formData.assignee_id)
           : null,

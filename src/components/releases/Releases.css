@@ -1,186 +1,600 @@
-.releases-container {
-  padding: 10px;
+/* Modern Releases Page Styling - Matches Tickets.css */
+.releases-page-modern {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  margin: -24px -24px 0 -24px; /* Remove top and side padding from parent */
+  padding: 0; /* Remove any internal padding */
 }
 
-.section-title {
-  font-size: 18px;
-  font-weight: 500;
-  margin: 20px 0;
+/* Header Styling */
+.releases-header-modern {
+  background-color: white;
+  border-bottom: 1px solid #e9ecef;
+  padding: 1rem 2rem;
 }
 
-.releases-list {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.release-card {
-  background-color: #fff;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 20px;
-  position: relative;
-}
-
-.release-header {
-  display: flex;
-  justify-content: space-between;
+.releases-header-modern .d-flex {
   align-items: center;
-  margin-bottom: 10px;
 }
 
-.release-name {
-  font-size: 18px;
-  font-weight: 500;
+.releases-header-modern .user-avatar-container {
+  margin-left: 0.5rem;
+}
+
+.releases-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #212529;
   margin: 0;
 }
 
-.release-version {
-  font-size: 12px;
-  color: var(--light-text);
-  margin-left: 10px;
+.btn-icon {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  color: #6c757d;
+  transition: background-color 0.2s;
+}
+
+.btn-icon:hover {
+  background-color: #f8f9fa;
+}
+
+/* View Toggle */
+.view-toggle-modern {
+  display: flex;
+  background-color: #f8f9fa;
+  border-radius: 0.5rem;
+  padding: 0.25rem;
+  width: fit-content;
+}
+
+.btn-toggle {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border: none;
+  background: none;
+  border-radius: 0.375rem;
+  color: #6c757d;
+  font-weight: 500;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.btn-toggle:hover {
+  color: #495057;
+}
+
+.btn-toggle.active {
+  background-color: white;
+  color: #0d6efd;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.view-toggle {
+  display: flex;
+  border: 1px solid #dee2e6;
+  border-radius: 0.375rem;
+  overflow: hidden;
+}
+
+.view-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0.75rem;
+  background: white;
+  border: none;
+  color: #6c757d;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.view-btn:hover {
+  background-color: #f8f9fa;
+  color: #495057;
+}
+
+.view-btn.active {
+  background-color: #0d6efd;
+  color: white;
+}
+
+.view-btn:not(:last-child) {
+  border-right: 1px solid #dee2e6;
+}
+
+/* Loading Spinner */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+}
+
+.loader {
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #3b82f6;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Content Area */
+.releases-content-modern {
+  padding: 1rem 2rem 2rem 2rem;
+}
+
+.releases-list-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.releases-grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Card Styling */
+.release-card-modern {
+  background-color: white;
+  border: 1px solid #e9ecef;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+  cursor: pointer;
+  height: fit-content;
+}
+
+.release-card-modern:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background-color: #f8f9fa;
+  transform: translateY(-2px);
+}
+
+.release-card-id {
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #0d6efd;
+  margin: 0;
+}
+
+.release-card-title {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #495057;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.release-card-version {
+  display: flex;
+  align-items: center;
+  font-size: 0.875rem;
+  color: #6c757d;
+  margin-top: 0.5rem;
+}
+
+.release-card-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+.release-card-target {
+  display: flex;
+  align-items: center;
+}
+
+.release-card-tickets {
+  font-size: 0.75rem;
+  color: #6c757d;
+}
+
+.release-card-description {
+  font-size: 0.875rem;
+  color: #6c757d;
+  line-height: 1.4;
+}
+
+/* List Item Styling */
+.release-list-item-modern {
+  background-color: white;
+  border: 1px solid #e9ecef;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.release-list-item-modern:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background-color: #f8f9fa;
+}
+
+.release-id-modern {
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+  font-weight: 600;
+  color: #0d6efd;
+  font-size: 0.875rem;
+}
+
+.release-title-modern {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #495057;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.release-version-modern {
+  display: flex;
+  align-items: center;
+  font-size: 0.875rem;
+  color: #6c757d;
+  margin-top: 0.5rem;
+}
+
+.release-meta {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.875rem;
+  color: #6c757d;
 }
 
 .release-target {
-  font-size: 14px;
-  color: var(--light-text);
-  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
 }
 
-.release-target i {
-  margin-right: 5px;
+.release-tickets-count {
+  font-size: 0.75rem;
+  color: #6c757d;
 }
 
-.release-description {
-  margin-bottom: 15px;
+.release-description-modern {
+  font-size: 0.875rem;
+  color: #6c757d;
+  line-height: 1.4;
 }
 
-.stakeholder-summary {
-  background-color: #f9f9f9;
-  border-left: 3px solid var(--primary-color);
-  padding: 15px;
-  border-radius: 0 4px 4px 0;
-  margin-bottom: 15px;
+/* Related Tickets in Cards */
+.release-card-related-tickets {
+  border-top: 1px solid #e9ecef;
+  padding-top: 1rem;
+  margin-top: 1rem;
 }
 
-.stakeholder-summary h5 {
-  font-size: 14px;
+.related-tickets-title {
+  font-size: 0.875rem;
   font-weight: 600;
-  margin: 0 0 5px 0;
+  color: #495057;
+  margin: 0 0 0.75rem 0;
 }
 
-.stakeholder-summary p {
-  font-size: 14px;
-  margin: 0;
-}
-
-.related-tickets {
+.related-tickets-preview {
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  margin-top: 10px;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
 }
 
-.related-ticket-card {
-  background-color: #f5f5f5; /* Light gray background */
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 20px;
-  position: relative;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.related-ticket-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-.related-ticket-card .ticket-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 5px;
-}
-
-.related-ticket-card .ticket-title {
-  font-size: 16px;
-  font-weight: 500;
-  margin: 0;
-}
-
-.ticket-title-link {
-  color: #333;
-  text-decoration: none;
-  transition: color 0.2s;
-}
-
-.ticket-title-link:hover {
-  color: var(--primary-color);
-  text-decoration: underline;
-}
-
-.related-ticket-card .ticket-badges {
-  display: flex;
-  gap: 8px;
-}
-
-.related-ticket-card .ticket-id {
-  font-size: 13px;
-  color: var(--light-text);
-  margin-bottom: 8px;
-}
-
-.related-ticket-card .ticket-details {
-  display: flex;
-  gap: 20px;
-  font-size: 14px;
-}
-
-.related-ticket-card .ticket-assignee,
-.related-ticket-card .ticket-support-area {
+.related-ticket-preview {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: #f8f9fa;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-.related-ticket-card .ticket-detail {
-  background-color: #f8f9fe;
-  border-left: 4px solid #4a6cf7;
-  padding: 15px;
-  border-radius: 0 8px 8px 0;
-  margin: 15px 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+.related-ticket-preview:hover {
+  background: #e9ecef;
 }
 
-.related-ticket-card .ticket-detail h6 {
-  font-size: 15px;
+.ticket-preview-id {
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+  font-size: 0.75rem;
   font-weight: 600;
-  margin: 0 0 8px 0;
-  color: #4a6cf7;
+  color: #0d6efd;
+  flex-shrink: 0;
 }
 
-.related-ticket-card .ticket-detail p {
-  font-size: 14px;
-  margin: 0;
-  line-height: 1.5;
+.ticket-preview-title {
+  font-size: 0.75rem;
+  color: #495057;
+  flex-grow: 1;
 }
 
-.related-ticket-card .ticket-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 15px;
-}
-
-.empty-tickets {
+.related-tickets-more {
+  font-size: 0.75rem;
+  color: #6c757d;
   text-align: center;
-  padding: 20px;
-  color: var(--light-text);
+  padding: 0.25rem;
+  font-style: italic;
 }
 
-.release-actions {
+.related-tickets-more.clickable {
+  color: #0d6efd;
+  cursor: pointer;
+  font-style: normal;
+  font-weight: 500;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.related-tickets-more.clickable:hover {
+  background-color: #f8f9fa;
+  color: #0b5ed7;
+  transform: translateY(-1px);
+}
+
+/* Related Tickets in List Items */
+.release-related-tickets-list {
+  border-top: 1px solid #e9ecef;
+  padding-top: 1rem;
+  margin-top: 1rem;
+}
+
+.related-tickets-header {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 0.75rem;
+}
+
+.related-tickets-preview-list {
   display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 15px;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.related-ticket-preview-list {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.related-ticket-preview-list:hover {
+  background: #e9ecef;
+}
+
+/* No Releases Message */
+.no-releases-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  color: #6c757d;
+}
+
+.no-releases-icon {
+  color: #dee2e6;
+  margin-bottom: 1.5rem;
+}
+
+.no-releases-message h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #495057;
+  margin: 0 0 1rem 0;
+}
+
+.no-releases-message p {
+  font-size: 1rem;
+  color: #6c757d;
+  margin: 0 0 2rem 0;
+  max-width: 400px;
+}
+
+/* Status Badges */
+.status-badge {
+  display: flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+/* Release Status Badge Colors */
+.status-planning {
+  background-color: #fff3cd;
+  color: #664d03;
+}
+
+.status-development {
+  background-color: #cfe2ff;
+  color: #084298;
+}
+
+.status-testing {
+  background-color: #e2e3ff;
+  color: #3730a3;
+}
+
+.status-ready-for-deployment {
+  background-color: #d1ecf1;
+  color: #0c5460;
+}
+
+.status-deployed {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-completed {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-on-hold {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.status-cancelled {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.status-unknown {
+  background-color: #e9ecef;
+  color: #6c757d;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .releases-page-modern {
+    margin: -16px -16px 0 -16px;
+  }
+
+  .releases-header-modern,
+  .releases-controls-modern,
+  .releases-content-modern {
+    padding: 1rem;
+  }
+
+  .releases-title {
+    font-size: 1.5rem;
+  }
+
+  .releases-controls-modern .d-flex {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .releases-controls-modern .d-flex:first-child {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .control-btn-text {
+    display: none;
+  }
+
+  .releases-grid-container {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .release-card-modern,
+  .release-list-item-modern {
+    padding: 1rem;
+  }
+
+  .release-card-meta,
+  .release-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+
+  .related-tickets-preview,
+  .related-tickets-preview-list {
+    gap: 0.25rem;
+  }
+
+  .related-ticket-preview,
+  .related-ticket-preview-list {
+    padding: 0.5rem;
+  }
+
+  .no-releases-message {
+    padding: 2rem 1rem;
+  }
+
+  .no-releases-message h3 {
+    font-size: 1.25rem;
+  }
+
+  .no-releases-message p {
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .releases-header-modern .d-flex {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .releases-controls-modern .d-flex:first-child {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .control-btn,
+  .sort-select {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .view-toggle {
+    width: 100%;
+  }
+
+  .view-btn {
+    flex: 1;
+  }
+}
+
+/* Active Filters Summary */
+.active-filters-summary {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin: 0 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.active-filters-summary .btn-outline-secondary {
+  border-color: #cbd5e1;
+  color: #64748b;
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.active-filters-summary .btn-outline-secondary:hover {
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+  color: #475569;
 }

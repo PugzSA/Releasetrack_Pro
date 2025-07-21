@@ -119,7 +119,7 @@ const TicketModal = ({
         type: formData.type,
         priority: formData.priority,
         status: formData.status,
-        release_id: formData.release_id ? parseInt(formData.release_id) : null,
+        release_id: formData.release_id || null,
         description: formData.description,
         solutionnotes: formData.solutionNotes,
         testNotes: formData.testNotes,

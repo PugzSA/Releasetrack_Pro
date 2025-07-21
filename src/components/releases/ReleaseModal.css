@@ -1,0 +1,508 @@
+/* Release Modal Styles - Matches TicketModal.css */
+.release-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1060;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.release-modal-modern {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.15);
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+  animation: slideUp 0.3s ease-out;
+}
+
+.release-modal-modern.scrolling::-webkit-scrollbar-thumb {
+  background: #c1c8cd;
+}
+
+.release-modal-modern::-webkit-scrollbar {
+  width: 8px;
+}
+
+.release-modal-modern::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.release-modal-modern::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+.release-modal-close-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.95);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1000;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  color: #374151;
+  font-size: 0;
+}
+
+.release-modal-close-btn:hover {
+  background: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: scale(1.05);
+}
+
+.release-modal-close-btn svg {
+  width: 20px;
+  height: 20px;
+  color: #374151;
+}
+
+/* Header */
+.release-modal-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px 32px;
+  border-radius: 16px 16px 0 0;
+  width: 100%;
+  box-sizing: border-box;
+  position: relative;
+  margin: 0;
+  border: none;
+  outline: none;
+}
+
+.release-modal-title-section {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 0;
+}
+
+.release-modal-id {
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+  font-size: 14px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 6px 12px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.release-modal-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-edit-release,
+.btn-save-release,
+.btn-cancel-edit {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-edit-release {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-edit-release:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.btn-save-release {
+  background: #10b981;
+  color: white;
+}
+
+.btn-save-release:hover:not(:disabled) {
+  background: #059669;
+}
+
+.btn-save-release:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.btn-cancel-edit {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-cancel-edit:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.edit-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.release-modal-status-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.release-status-badge,
+.release-priority-badge {
+  display: flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+/* Content */
+.release-modal-content {
+  padding: 32px;
+  overflow-y: auto;
+  max-height: calc(90vh - 200px);
+}
+
+/* Footer */
+.release-modal-footer {
+  padding: 20px 32px;
+  border-top: 1px solid #e5e7eb;
+  background: #f9fafb;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.release-modal-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.release-modal-error {
+  display: flex;
+  align-items: center;
+  background: #fef2f2;
+  color: #dc2626;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  border: 1px solid #fecaca;
+}
+
+.release-modal-section {
+  margin-bottom: 32px;
+}
+
+.release-modal-section:last-child {
+  margin-bottom: 0;
+}
+
+/* Full width sections for Description and Stakeholder Summary */
+.release-modal-section .form-textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  font-size: 18px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #f3f4f6;
+}
+
+/* Form Elements */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  padding: 12px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 80px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-display {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background: #f9fafb;
+  border: 2px solid #f3f4f6;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #374151;
+  min-height: 44px;
+}
+
+/* Related Tickets */
+.related-tickets-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.related-ticket-item {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.related-ticket-item:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Read-only variant for release modal */
+.related-ticket-item.read-only {
+  cursor: default;
+  opacity: 0.9;
+}
+
+.related-ticket-item.read-only:hover {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  box-shadow: none;
+  transform: none;
+}
+
+.ticket-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.ticket-id {
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: #3b82f6;
+}
+
+.ticket-status {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.ticket-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.ticket-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.ticket-type,
+.ticket-priority {
+  padding: 2px 6px;
+  background: #e5e7eb;
+  border-radius: 4px;
+}
+
+/* Status Colors */
+.status-planning {
+  background-color: #fff3cd;
+  color: #664d03;
+}
+
+.status-development {
+  background-color: #cfe2ff;
+  color: #084298;
+}
+
+.status-testing {
+  background-color: #e2e3ff;
+  color: #3730a3;
+}
+
+.status-ready-for-deployment {
+  background-color: #d1ecf1;
+  color: #0c5460;
+}
+
+.status-deployed {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-completed {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-on-hold {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.status-cancelled {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.status-in-progress {
+  background-color: #cfe2ff;
+  color: #084298;
+}
+
+.status-released {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-unknown {
+  background-color: #e9ecef;
+  color: #6c757d;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .release-modal-modern {
+    width: 95%;
+    margin: 20px;
+    max-height: 95vh;
+  }
+
+  .release-modal-header {
+    padding: 24px 20px 20px 20px;
+  }
+
+  .release-modal-content {
+    padding: 24px 20px;
+  }
+
+  .release-modal-footer {
+    padding: 16px 20px;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .release-modal-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .release-modal-title-section {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .release-modal-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .edit-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

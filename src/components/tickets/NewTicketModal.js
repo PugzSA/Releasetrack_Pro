@@ -108,7 +108,7 @@ const NewTicketModal = ({
         supportArea: formData.supportArea,
         solutionnotes: formData.solutionNotes,
         testNotes: formData.testNotes,
-        release_id: formData.release_id ? parseInt(formData.release_id) : null,
+        release_id: formData.release_id || null,
         requester_id: formData.requester ? parseInt(formData.requester) : null,
         assignee_id: formData.assignee ? parseInt(formData.assignee) : null,
       };

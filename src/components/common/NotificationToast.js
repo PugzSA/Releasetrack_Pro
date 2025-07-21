@@ -89,13 +89,14 @@ const NotificationToast = ({ show, message, variant = "success", onClose }) => {
 
   const toastContent = (
     <ToastContainer
-      position="top-end"
+      position="top-center"
       className="p-3"
       style={{
         zIndex: 9999,
         position: "fixed",
-        top: 0,
-        right: 0,
+        top: "20px",
+        left: "50%",
+        transform: "translateX(-50%)",
       }}
     >
       <Toast
@@ -138,19 +139,18 @@ const NotificationToast = ({ show, message, variant = "success", onClose }) => {
     </ToastContainer>
   );
 
-  // Simple test toast to debug
+  // Simple centered toast
   if (visible) {
+    const toastStyles = getToastStyles();
     const simpleToast = (
       <div
         style={{
           position: "fixed",
           top: "20px",
-          right: "20px",
-          background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
-          color: "white",
+          left: "50%",
+          transform: "translateX(-50%)",
+          ...toastStyles,
           padding: "16px 24px",
-          borderRadius: "12px",
-          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12)",
           zIndex: 99999,
           minWidth: "300px",
           fontSize: "14px",
@@ -162,7 +162,7 @@ const NotificationToast = ({ show, message, variant = "success", onClose }) => {
           if (onClose) onClose();
         }}
       >
-        ✓ {message}
+        {getIcon()} {message}
         <button
           style={{
             background: "none",

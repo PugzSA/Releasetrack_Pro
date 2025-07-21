@@ -1,0 +1,361 @@
+/* Release Search Modal Styles - Matches SearchModal.css */
+.search-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  z-index: 2000;
+  backdrop-filter: blur(4px);
+  padding-top: 10vh;
+}
+
+/* Main Modal Container */
+.search-modal-container {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 600px;
+  max-height: 70vh;
+  overflow: hidden;
+  animation: searchModalSlideIn 0.3s ease-out;
+}
+
+@keyframes searchModalSlideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Header Section */
+.search-modal-header {
+  padding: 24px 24px 16px 24px;
+  border-bottom: 1px solid #f1f3f4;
+}
+
+.search-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 16px;
+  color: #6c757d;
+  z-index: 1;
+}
+
+.search-input {
+  width: 100%;
+  padding: 16px 16px 16px 48px;
+  padding-right: 48px;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  font-size: 16px;
+  background-color: #f8f9fa;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.search-input:focus {
+  border-color: #0d6efd;
+  background-color: white;
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+}
+
+.search-close-btn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  padding: 8px;
+  border-radius: 8px;
+  color: #6c757d;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.search-close-btn:hover {
+  background-color: #f8f9fa;
+  color: #495057;
+}
+
+/* Results Section */
+.search-results {
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+/* Placeholder State */
+.search-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  color: #6c757d;
+}
+
+.placeholder-icon {
+  color: #dee2e6;
+  margin-bottom: 16px;
+}
+
+.search-placeholder p {
+  font-size: 18px;
+  font-weight: 500;
+  margin: 0 0 8px 0;
+  color: #495057;
+}
+
+.search-placeholder span {
+  font-size: 14px;
+  color: #6c757d;
+}
+
+/* No Results State */
+.search-no-results {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  color: #6c757d;
+}
+
+.no-results-icon {
+  color: #dee2e6;
+  margin-bottom: 16px;
+}
+
+.search-no-results p {
+  font-size: 18px;
+  font-weight: 500;
+  margin: 0 0 8px 0;
+  color: #495057;
+}
+
+.search-no-results span {
+  font-size: 14px;
+  color: #6c757d;
+}
+
+/* Results List */
+.search-results-list {
+  padding: 8px 0;
+}
+
+.search-result-item {
+  padding: 16px 24px;
+  border-bottom: 1px solid #f1f3f4;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.search-result-item:hover {
+  background-color: #f8f9fa;
+}
+
+.search-result-item:last-child {
+  border-bottom: none;
+}
+
+.search-result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.search-result-id {
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0d6efd;
+}
+
+.search-result-status {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+/* Status Colors */
+.status-planning {
+  background-color: #fff3cd;
+  color: #664d03;
+}
+
+.status-development {
+  background-color: #cfe2ff;
+  color: #084298;
+}
+
+.status-testing {
+  background-color: #e2e3ff;
+  color: #3730a3;
+}
+
+.status-ready-for-deployment {
+  background-color: #d1ecf1;
+  color: #0c5460;
+}
+
+.status-deployed {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-completed {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-on-hold {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.status-cancelled {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.status-unknown {
+  background-color: #e9ecef;
+  color: #6c757d;
+}
+
+.search-result-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #212529;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.search-result-version {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #6c757d;
+}
+
+.version-icon {
+  margin-right: 6px;
+}
+
+.version-text {
+  font-weight: 500;
+  color: #495057;
+}
+
+.search-result-description {
+  font-size: 14px;
+  color: #6c757d;
+  line-height: 1.4;
+  margin-bottom: 12px;
+}
+
+.search-result-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.search-result-meta {
+  display: flex;
+  gap: 16px;
+  font-size: 14px;
+  color: #6c757d;
+}
+
+.search-result-target {
+  display: flex;
+  align-items: center;
+}
+
+.target-icon {
+  margin-right: 6px;
+}
+
+.search-result-tickets {
+  font-size: 13px;
+  color: #6c757d;
+}
+
+/* Search Highlighting */
+.search-highlight {
+  background-color: #fff3cd;
+  color: #664d03;
+  font-weight: 600;
+  padding: 1px 2px;
+  border-radius: 2px;
+}
+
+/* Scrollbar Styling */
+.search-results::-webkit-scrollbar {
+  width: 6px;
+}
+
+.search-results::-webkit-scrollbar-track {
+  background: #f1f3f4;
+}
+
+.search-results::-webkit-scrollbar-thumb {
+  background: #c1c8cd;
+  border-radius: 3px;
+}
+
+.search-results::-webkit-scrollbar-thumb:hover {
+  background: #a8b2ba;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .search-modal-container {
+    width: 95%;
+    margin: 20px;
+    max-height: 80vh;
+  }
+
+  .search-modal-header {
+    padding: 20px 20px 16px 20px;
+  }
+
+  .search-result-item {
+    padding: 16px 20px;
+  }
+
+  .search-result-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .search-result-meta {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .search-placeholder,
+  .search-no-results {
+    padding: 32px 20px;
+  }
+}

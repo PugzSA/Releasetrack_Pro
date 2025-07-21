@@ -1,38 +1,282 @@
-import React, { useState, useEffect } from "react";
-import "./Releases.css";
-import { Button, Accordion, Modal } from "react-bootstrap";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useMemo } from "react";
+import ReleaseModal from "./ReleaseModal";
+import NewReleaseModal from "./NewReleaseModal";
+import ReleaseFilterModal from "./ReleaseFilterModal";
+import ReleaseSearchModal from "./ReleaseSearchModal";
+import TicketModal from "../tickets/TicketModal";
+import UserAvatar from "../common/UserAvatar";
+import NotificationToast from "../common/NotificationToast";
 import { useApp } from "../../context/AppContext";
-import EditTicketModal from "../tickets/EditTicketModal";
 import { getStatusClass } from "../../utils/statusUtils";
+import {
+  RELEASE_SORT_OPTIONS,
+  DEFAULT_RELEASE_FILTERS,
+} from "../../constants/releaseFields";
+import {
+  Search,
+  Filter,
+  User,
+  Clock,
+  List,
+  Grid,
+  Plus,
+  Package,
+  Calendar,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+} from "lucide-react";
+import "./Releases.css";
 
 const Releases = () => {
-  const navigate = useNavigate();
-  const { releases, loading, error, deleteRelease, supabase } = useApp();
+  const {
+    releases,
+    loading,
+    error,
+    deleteRelease,
+    updateRelease,
+    createRelease,
+    updateTicket,
+    users,
+    tickets,
+    supabase,
+    refreshData,
+  } = useApp();
 
-  // State for delete confirmation modal
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [releaseToDelete, setReleaseToDelete] = useState(null);
-  const [deleteLoading, setDeleteLoading] = useState(false);
-  const [deleteError, setDeleteError] = useState(null);
+  // View and filter state
+  const [viewMode, setViewMode] = useState("list");
+  const [sortOption, setSortOption] = useState("target_date_desc");
+  const [sortOrder, setSortOrder] = useState("desc");
+  const [releaseFilters, setReleaseFilters] = useState(DEFAULT_RELEASE_FILTERS);
 
-  // State for ticket edit modal
-  const [showTicketEditModal, setShowTicketEditModal] = useState(false);
+  // Modal states
+  const [selectedRelease, setSelectedRelease] = useState(null);
   const [selectedTicket, setSelectedTicket] = useState(null);
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  const [showSearchModal, setShowSearchModal] = useState(false);
+  const [showNewReleaseModal, setShowNewReleaseModal] = useState(false);
 
-  // State for ticket refresh operation
-  const [refreshingTickets, setRefreshingTickets] = useState(false);
-  const [refreshError, setRefreshError] = useState(null);
+  // Expanded tickets state - tracks which releases have expanded ticket lists
+  const [expandedTickets, setExpandedTickets] = useState(new Set());
 
-  // State for sorting
-  const [sortOrder, setSortOrder] = useState("desc"); // 'asc' for ascending, 'desc' for descending
+  // Toast notification state
+  const [toast, setToast] = useState({
+    show: false,
+    message: "",
+    type: "info",
+  });
 
-  // Toggle sort order between ascending and descending
-  const toggleSortOrder = () => {
-    setSortOrder((prevOrder) => (prevOrder === "asc" ? "desc" : "asc"));
+  // Saved filters state (placeholder for future implementation)
+  const [savedFilters, setSavedFilters] = useState([]);
+
+  // Toast notification helper
+  const showToast = (message, type = "info") => {
+    setToast({ show: true, message, type });
   };
 
-  // Handle delete confirmation
+  // Toggle expanded tickets for a release
+  const toggleExpandedTickets = (releaseId, event) => {
+    event.stopPropagation(); // Prevent release card click
+    setExpandedTickets((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(releaseId)) {
+        newSet.delete(releaseId);
+      } else {
+        newSet.add(releaseId);
+      }
+      return newSet;
+    });
+  };
+
+  // Sort toggle handler
+  const handleSortToggle = () => {
+    const newOrder = sortOrder === "desc" ? "asc" : "desc";
+    setSortOrder(newOrder);
+    setSortOption(`target_date_${newOrder}`);
+  };
+
+  // Filter and sort releases
+  const filteredAndSortedReleases = useMemo(() => {
+    if (!releases || !Array.isArray(releases)) return [];
+
+    let filtered = [...releases];
+
+    // Apply filters
+    if (releaseFilters.status.length > 0) {
+      filtered = filtered.filter((release) =>
+        releaseFilters.status.includes(release.status)
+      );
+    }
+
+    if (releaseFilters.type) {
+      filtered = filtered.filter(
+        (release) => release.type === releaseFilters.type
+      );
+    }
+
+    if (releaseFilters.priority) {
+      filtered = filtered.filter(
+        (release) => release.priority === releaseFilters.priority
+      );
+    }
+
+    if (releaseFilters.version) {
+      filtered = filtered.filter(
+        (release) => release.version === releaseFilters.version
+      );
+    }
+
+    if (releaseFilters.target_date_from) {
+      filtered = filtered.filter((release) => {
+        if (!release.target) return false;
+        return (
+          new Date(release.target) >= new Date(releaseFilters.target_date_from)
+        );
+      });
+    }
+
+    if (releaseFilters.target_date_to) {
+      filtered = filtered.filter((release) => {
+        if (!release.target) return false;
+        return (
+          new Date(release.target) <= new Date(releaseFilters.target_date_to)
+        );
+      });
+    }
+
+    // Apply sorting
+    filtered.sort((a, b) => {
+      switch (sortOption) {
+        case "target_date_asc":
+          if (!a.target) return 1;
+          if (!b.target) return -1;
+          return new Date(a.target) - new Date(b.target);
+        case "target_date_desc":
+          if (!a.target) return 1;
+          if (!b.target) return -1;
+          return new Date(b.target) - new Date(a.target);
+        case "name_asc":
+          return (a.name || "").localeCompare(b.name || "");
+        case "name_desc":
+          return (b.name || "").localeCompare(a.name || "");
+        case "status_asc":
+          return (a.status || "").localeCompare(b.status || "");
+        case "created_date_desc":
+          return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+        case "created_date_asc":
+          return new Date(a.created_at || 0) - new Date(b.created_at || 0);
+        default:
+          return 0;
+      }
+    });
+
+    return filtered;
+  }, [releases, releaseFilters, sortOption]);
+
+  // Handler functions
+  const handleReleaseClick = (release) => {
+    setSelectedRelease(release);
+  };
+
+  const handleTicketClick = (ticket) => {
+    setSelectedTicket(ticket);
+  };
+
+  const handleApplyFilters = (newFilters) => {
+    setReleaseFilters(newFilters);
+    showToast("Filters applied successfully", "success");
+  };
+
+  const handleClearFilters = () => {
+    setReleaseFilters(DEFAULT_RELEASE_FILTERS);
+    showToast("Filters cleared", "info");
+  };
+
+  // Count active filters for the main component
+  const activeFilterCount = useMemo(() => {
+    if (!releaseFilters) return 0;
+    return Object.values(releaseFilters).filter((value) => {
+      if (Array.isArray(value)) {
+        return value.length > 0;
+      }
+      return value && value !== "";
+    }).length;
+  }, [releaseFilters]);
+
+  const handleUpdateRelease = async (releaseId, updateData) => {
+    try {
+      await updateRelease(releaseId, updateData);
+      return true;
+    } catch (error) {
+      console.error("Error updating release:", error);
+      throw error;
+    }
+  };
+
+  // Load saved filters on component mount
+  useEffect(() => {
+    const loadSavedFilters = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("saved_filters")
+          .select("*")
+          .eq("filter_type", "releases")
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+        setSavedFilters(data || []);
+      } catch (error) {
+        console.error("Error loading saved filters:", error);
+      }
+    };
+
+    if (supabase) {
+      loadSavedFilters();
+    }
+  }, [supabase]);
+
+  // Saved filter handlers
+  const saveFilter = async (filterData) => {
+    try {
+      const { data, error } = await supabase
+        .from("saved_filters")
+        .insert([filterData])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setSavedFilters((prev) => [data, ...prev]);
+      showToast("Filter saved successfully", "success");
+      return data;
+    } catch (error) {
+      console.error("Error saving filter:", error);
+      showToast("Failed to save filter", "error");
+      throw error;
+    }
+  };
+
+  const deleteSavedFilter = async (filterId) => {
+    try {
+      const { error } = await supabase
+        .from("saved_filters")
+        .delete()
+        .eq("id", filterId);
+
+      if (error) throw error;
+
+      setSavedFilters((prev) =>
+        prev.filter((filter) => filter.id !== filterId)
+      );
+      showToast("Filter deleted successfully", "success");
+    } catch (error) {
+      console.error("Error deleting saved filter:", error);
+      showToast("Failed to delete filter", "error");
+      throw error;
+    }
+  };
+
+  // Handle delete confirmation (keeping existing functionality)
   const handleDeleteConfirm = async () => {
     if (!releaseToDelete) return;
 
@@ -286,415 +530,430 @@ const Releases = () => {
     }
   };
 
-  // Local releases state that can be updated independently of context
-  // Initialize with empty array, will be populated from context when available
-  const [localReleases, setLocalReleases] = useState([]);
+  // Release card component
+  const ReleaseCard = ({ release }) => {
+    const formatDate = (dateString) => {
+      if (!dateString) return "No target date";
+      try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        });
+      } catch {
+        return dateString;
+      }
+    };
 
-  // Initialize localReleases with context releases when they change
-  useEffect(() => {
-    if (releases && releases.length > 0) {
-      console.log("Initializing local releases from context:", releases.length);
-      setLocalReleases([...releases]);
-    } else {
-      // If no context releases, use fallback data
-      setLocalReleases(fallbackReleases);
-    }
-  }, [releases]);
-
-  // Fallback data in case no releases are loaded from context
-  const fallbackReleases = [
-    {
-      id: 1,
-      name: "February 2024 Release",
-      version: "v1.0",
-      target: "Feb 28, 2024",
-      status: "testing",
-      description: "Focus on automation workflow and integration improvements",
-      stakeholderSummary:
-        "Streamlining internal processes with automated workflows, reducing manual work by 40%",
-      tickets: [
-        {
-          id: 101,
-          title: "Implement automated testing for API endpoints",
-          description: "Create automated test suite for all REST API endpoints",
-          type: "feature",
-          priority: "medium",
-          status: "in-progress",
-        },
-        {
-          id: 102,
-          title: "Fix dashboard loading performance",
-          description: "Dashboard takes >3s to load on slower connections",
-          type: "bug",
-          priority: "high",
-          status: "open",
-        },
-      ],
-    },
-    {
-      id: 2,
-      name: "January 2024 Release",
-      version: "v1.0",
-      target: "Jan 31, 2024",
-      status: "development",
-      description:
-        "Monthly release including customer portal enhancements and bug fixes",
-      stakeholderSummary:
-        "This release will improve customer experience with new self-service capabilities and resolve 12 critical bugs reported by users",
-      tickets: [],
-    },
-  ];
-
-  return (
-    <div className="releases-container">
-      <div className="page-header">
-        <div>
-          <h1>Release Management</h1>
-          <p className="page-subtitle">
-            Manage your deployment cycles and track progress
-          </p>
-        </div>
-        <Link to="/releases/new" className="btn btn-primary">
-          <i className="bi bi-plus"></i> New Release
-        </Link>
-      </div>
-
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h2 className="section-title mb-0">All Releases</h2>
-        <Button
-          variant="outline-secondary"
-          className="sort-btn"
-          onClick={toggleSortOrder}
-          title={
-            sortOrder === "asc"
-              ? "Sort by target date (oldest first)"
-              : "Sort by target date (newest first)"
-          }
-        >
-          <i
-            className={`bi bi-sort-${sortOrder === "asc" ? "up" : "down"} me-1`}
-          ></i>
-          <span>
-            Sort by Target Date{" "}
-            {sortOrder === "asc" ? "(Oldest First)" : "(Newest First)"}
-          </span>
-        </Button>
-      </div>
-
-      {loading ? (
-        <div className="text-center p-5">
-          <div className="spinner-border" role="status">
-            <span className="visually-hidden">Loading...</span>
+    return (
+      <div
+        onClick={() => handleReleaseClick(release)}
+        className="release-card-modern"
+      >
+        <div className="d-flex justify-content-between align-items-start mb-3">
+          <h3 className="release-card-id mb-0">{release.id}</h3>
+          <div className={`status-badge ${getStatusClass(release.status)}`}>
+            <span>{release.status || "Unknown"}</span>
           </div>
-          <p className="mt-3">Loading releases...</p>
         </div>
-      ) : error ? (
-        <div className="alert alert-danger" role="alert">
-          <i className="bi bi-exclamation-triangle me-2"></i>
-          {error}
-        </div>
-      ) : localReleases.length > 0 ? (
-        <div className="releases-list">
-          {/* Sort releases by target date based on sortOrder */}
-          {[...localReleases]
-            .sort((a, b) => {
-              // Handle cases where target might be undefined or null
-              if (!a.target) return 1; // Move items without target to the bottom
-              if (!b.target) return -1; // Move items without target to the bottom
 
-              // Convert to Date objects for comparison
-              const dateA = new Date(a.target);
-              const dateB = new Date(b.target);
-
-              // Sort based on the current sort order
-              if (sortOrder === "asc") {
-                return dateA - dateB; // Ascending: oldest first
-              } else {
-                return dateB - dateA; // Descending: newest first
-              }
-            })
-            .map((release) => (
-              <div key={release.id} className="release-card">
-                <div className="release-header">
-                  <div>
-                    <h3 className="release-name">
-                      {release.name || "Untitled Release"}
-                    </h3>
-                    <span className="release-version">
-                      {release.version || ""}
-                    </span>
-                  </div>
-                  <span
-                    className={`status-badge ${release.status || "unknown"}`}
-                  >
-                    {release.status || "Unknown"}
-                  </span>
-                </div>
-
-                <div className="release-target">
-                  <i className="bi bi-calendar"></i> Target:{" "}
-                  {release.target || "Not set"}
-                </div>
-
-                <div className="release-description">
-                  {release.description || "No description provided"}
-                </div>
-
-                <div className="stakeholder-summary">
-                  <h5>Stakeholder Summary:</h5>
-                  <p>
-                    {release.stakeholder_summary ||
-                      release.stakeholderSummary ||
-                      "No stakeholder summary provided"}
-                  </p>
-                </div>
-
-                <Accordion className="mt-3">
-                  <Accordion.Item eventKey="0">
-                    <Accordion.Header>
-                      <i className="bi bi-ticket me-2"></i> Related Tickets (
-                      {release.tickets ? release.tickets.length : 0})
-                    </Accordion.Header>
-                    <Accordion.Body>
-                      {release.tickets && release.tickets.length > 0 ? (
-                        <div className="related-tickets">
-                          {release.tickets.map((ticket) => (
-                            <div
-                              key={ticket.id}
-                              className="related-ticket-card"
-                            >
-                              <div className="ticket-header">
-                                <h5 className="ticket-title">
-                                  <a
-                                    href="#"
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      handleOpenTicketEditModal(ticket);
-                                    }}
-                                    className="ticket-title-link"
-                                  >
-                                    {ticket.title}
-                                  </a>
-                                </h5>
-                                <div className="ticket-badges">
-                                  <span
-                                    className={`status-badge ${ticket.type}`}
-                                  >
-                                    {ticket.type}
-                                  </span>
-                                  <span
-                                    className={`status-badge ${ticket.priority}`}
-                                  >
-                                    {ticket.priority}
-                                  </span>
-                                </div>
-                              </div>
-
-                              <div className="ticket-id">
-                                {ticket.id} •{" "}
-                                {ticket.date ||
-                                  (ticket.created_at
-                                    ? new Date(
-                                        ticket.created_at
-                                      ).toLocaleDateString()
-                                    : "No date")}
-                              </div>
-
-                              <div className="ticket-details mt-3">
-                                <div className="ticket-assignee">
-                                  <i className="bi bi-person"></i>{" "}
-                                  {ticket.assignee || "Unassigned"}
-                                </div>
-                                <div className="ticket-support-area">
-                                  <i className="bi bi-headset"></i>{" "}
-                                  {ticket.supportArea || "Not specified"}
-                                </div>
-                              </div>
-
-                              {ticket.description && (
-                                <div className="ticket-detail mt-3">
-                                  <h6>
-                                    <i className="bi bi-card-text me-2"></i>
-                                    Description:
-                                  </h6>
-                                  <p>{ticket.description}</p>
-                                </div>
-                              )}
-
-                              <div className="ticket-actions">
-                                <span
-                                  className={`status-badge ${getStatusClass(
-                                    ticket.status
-                                  )}`}
-                                >
-                                  {ticket.status}
-                                </span>
-                                <Button
-                                  variant="outline-primary"
-                                  size="sm"
-                                  onClick={() =>
-                                    handleOpenTicketEditModal(ticket)
-                                  }
-                                >
-                                  <i className="bi bi-pencil"></i>
-                                </Button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="empty-tickets">
-                          <p>No tickets associated with this release</p>
-                        </div>
-                      )}
-                    </Accordion.Body>
-                  </Accordion.Item>
-                </Accordion>
-
-                <div className="release-actions">
-                  <Button
-                    variant="outline-primary"
-                    size="sm"
-                    onClick={() => navigate(`/releases/edit/${release.id}`)}
-                  >
-                    <i className="bi bi-pencil"></i>
-                  </Button>
-                  <Button
-                    variant="outline-danger"
-                    size="sm"
-                    onClick={() => {
-                      setReleaseToDelete(release);
-                      setShowDeleteModal(true);
-                    }}
-                  >
-                    <i className="bi bi-trash"></i>
-                  </Button>
-                </div>
-              </div>
-            ))}
-        </div>
-      ) : (
-        <div className="text-center p-5">
-          <i
-            className="bi bi-inbox-fill"
-            style={{ fontSize: "3rem", color: "#ccc" }}
-          ></i>
-          <p className="mt-3">
-            No releases found. Click "New Release" to create one.
+        <div className="mb-3">
+          <p className="release-card-title">
+            {release.name || "Untitled Release"}
           </p>
-        </div>
-      )}
-
-      {/* Delete Modal */}
-      <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Confirm Delete</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <p>Are you sure you want to delete this release?</p>
-          <p>
-            <strong>This action cannot be undone.</strong>
-          </p>
-          {deleteError && (
-            <div className="alert alert-danger mt-3">
-              <i className="bi bi-exclamation-triangle me-2"></i>
-              {deleteError}
+          {release.version && (
+            <div className="release-card-version">
+              <Package size={14} className="me-1" />
+              {release.version}
             </div>
           )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button
-            variant="secondary"
-            onClick={() => setShowDeleteModal(false)}
-            disabled={deleteLoading}
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="danger"
-            onClick={handleDeleteConfirm}
-            disabled={deleteLoading}
-          >
-            {deleteLoading ? (
-              <>
-                <span
-                  className="spinner-border spinner-border-sm me-2"
-                  role="status"
-                  aria-hidden="true"
-                ></span>
-                Deleting...
-              </>
-            ) : (
-              "Delete"
-            )}
-          </Button>
-        </Modal.Footer>
-      </Modal>
+        </div>
 
-      {/* Ticket refresh notification */}
-      {refreshingTickets && (
-        <div
-          className="position-fixed bottom-0 end-0 p-3"
-          style={{ zIndex: 1050 }}
-        >
-          <div
-            className="toast show"
-            role="alert"
-            aria-live="assertive"
-            aria-atomic="true"
-          >
-            <div className="toast-header">
-              <div
-                className="spinner-border spinner-border-sm me-2"
-                role="status"
-              >
-                <span className="visually-hidden">Loading...</span>
+        <div className="release-card-meta mb-3">
+          <div className="release-card-target">
+            <Calendar size={14} className="me-1" />
+            <span>{formatDate(release.target)}</span>
+          </div>
+          {release.tickets && (
+            <div className="release-card-tickets">
+              {release.tickets.length} ticket
+              {release.tickets.length !== 1 ? "s" : ""}
+            </div>
+          )}
+        </div>
+
+        {release.description && (
+          <div className="release-card-description mb-3">
+            {release.description.length > 100
+              ? `${release.description.substring(0, 100)}...`
+              : release.description}
+          </div>
+        )}
+
+        {release.tickets && release.tickets.length > 0 && (
+          <div className="release-card-related-tickets">
+            <h6 className="related-tickets-title">
+              Related Tickets ({release.tickets.length})
+            </h6>
+            <div className="related-tickets-preview">
+              {(expandedTickets.has(release.id)
+                ? release.tickets
+                : release.tickets.slice(0, 3)
+              ).map((ticket) => (
+                <div
+                  key={ticket.id}
+                  className="related-ticket-preview"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleTicketClick(ticket);
+                  }}
+                >
+                  <span className="ticket-preview-id">{ticket.id}</span>
+                  <span className="ticket-preview-title">
+                    {ticket.title?.length > 30
+                      ? `${ticket.title.substring(0, 30)}...`
+                      : ticket.title}
+                  </span>
+                </div>
+              ))}
+              {release.tickets.length > 3 && (
+                <div
+                  className="related-tickets-more clickable"
+                  onClick={(e) => toggleExpandedTickets(release.id, e)}
+                >
+                  {expandedTickets.has(release.id)
+                    ? "Show less"
+                    : `+${release.tickets.length - 3} more tickets`}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Release list item component
+  const ReleaseListItem = ({ release }) => {
+    const formatDate = (dateString) => {
+      if (!dateString) return "No target date";
+      try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        });
+      } catch {
+        return dateString;
+      }
+    };
+
+    return (
+      <div
+        onClick={() => handleReleaseClick(release)}
+        className="release-list-item-modern"
+      >
+        <div className="d-flex justify-content-between align-items-start mb-3">
+          <div className="flex-grow-1">
+            <div className="d-flex align-items-center mb-2">
+              <span className="release-id-modern me-3">{release.id}</span>
+            </div>
+            <h3 className="release-title-modern">
+              {release.name || "Untitled Release"}
+            </h3>
+            {release.version && (
+              <div className="release-version-modern">
+                <Package size={14} className="me-1" />
+                {release.version}
               </div>
-              <strong className="me-auto">Refreshing Data</strong>
-              <small>Just now</small>
-            </div>
-            <div className="toast-body">
-              Fetching the latest ticket information...
-            </div>
+            )}
+          </div>
+          <div className={`status-badge ${getStatusClass(release.status)}`}>
+            <span>{release.status || "Unknown"}</span>
           </div>
         </div>
-      )}
 
-      {/* Error notification */}
-      {refreshError && (
-        <div
-          className="position-fixed bottom-0 end-0 p-3"
-          style={{ zIndex: 1050 }}
-        >
-          <div
-            className="toast show bg-danger text-white"
-            role="alert"
-            aria-live="assertive"
-            aria-atomic="true"
-          >
-            <div className="toast-header bg-danger text-white">
-              <i className="bi bi-exclamation-triangle-fill me-2"></i>
-              <strong className="me-auto">Error</strong>
+        <div className="release-meta mb-3">
+          <div className="release-target">
+            <Calendar size={14} className="me-1" />
+            <span>{formatDate(release.target)}</span>
+          </div>
+          {release.tickets && (
+            <div className="release-tickets-count">
+              {release.tickets.length} ticket
+              {release.tickets.length !== 1 ? "s" : ""}
+            </div>
+          )}
+        </div>
+
+        {release.description && (
+          <div className="release-description-modern mb-3">
+            {release.description.length > 150
+              ? `${release.description.substring(0, 150)}...`
+              : release.description}
+          </div>
+        )}
+
+        {release.tickets && release.tickets.length > 0 && (
+          <div className="release-related-tickets-list">
+            <div className="related-tickets-header">
+              Related Tickets ({release.tickets.length})
+            </div>
+            <div className="related-tickets-preview-list">
+              {(expandedTickets.has(release.id)
+                ? release.tickets
+                : release.tickets.slice(0, 2)
+              ).map((ticket) => (
+                <div
+                  key={ticket.id}
+                  className="related-ticket-preview-list"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleTicketClick(ticket);
+                  }}
+                >
+                  <span className="ticket-preview-id">{ticket.id}</span>
+                  <span className="ticket-preview-title">
+                    {ticket.title?.length > 50
+                      ? `${ticket.title.substring(0, 50)}...`
+                      : ticket.title}
+                  </span>
+                </div>
+              ))}
+              {release.tickets.length > 2 && (
+                <div
+                  className="related-tickets-more clickable"
+                  onClick={(e) => toggleExpandedTickets(release.id, e)}
+                >
+                  {expandedTickets.has(release.id)
+                    ? "Show less"
+                    : `+${release.tickets.length - 2} more tickets`}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="loader"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="releases-page-modern">
+      {/* Header */}
+      <div className="releases-header-modern">
+        <div className="d-flex justify-content-between align-items-center">
+          <h1 className="releases-title">Releases</h1>
+          <div className="d-flex align-items-center">
+            {/* New Release Button */}
+            <button
+              className="btn btn-primary me-3"
+              onClick={() => setShowNewReleaseModal(true)}
+            >
+              <Plus size={16} className="me-2" />
+              New Release
+            </button>
+
+            {/* Sort Button */}
+            <button
+              className="btn btn-outline-secondary me-3"
+              onClick={handleSortToggle}
+              title={`Sort by target date ${
+                sortOrder === "desc" ? "ascending" : "descending"
+              }`}
+            >
+              {sortOrder === "desc" ? (
+                <ArrowDown size={16} className="me-2" />
+              ) : (
+                <ArrowUp size={16} className="me-2" />
+              )}
+              {sortOrder === "desc" ? "Newest First" : "Oldest First"}
+            </button>
+
+            {/* View Toggle */}
+            <div className="view-toggle-modern me-3">
               <button
-                type="button"
-                className="btn-close"
-                onClick={() => setRefreshError(null)}
-              ></button>
+                onClick={() => setViewMode("list")}
+                className={`btn-toggle ${viewMode === "list" ? "active" : ""}`}
+              >
+                <List size={16} className="me-2" />
+                List View
+              </button>
+              <button
+                onClick={() => setViewMode("card")}
+                className={`btn-toggle ${viewMode === "card" ? "active" : ""}`}
+              >
+                <Grid size={16} className="me-2" />
+                Card View
+              </button>
             </div>
-            <div className="toast-body">{refreshError}</div>
+
+            {/* Search and Filter Icons */}
+            <button
+              className="btn btn-icon me-2"
+              onClick={() => setShowSearchModal(true)}
+              title="Search releases"
+            >
+              <Search size={20} />
+            </button>
+            <button
+              className="btn btn-icon me-3 position-relative"
+              onClick={() => setShowFilterModal(true)}
+              title="Filter releases"
+            >
+              <Filter size={20} />
+              {activeFilterCount > 0 && (
+                <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary">
+                  {activeFilterCount}
+                  <span className="visually-hidden">active filters</span>
+                </span>
+              )}
+            </button>
+
+            {/* User Avatar */}
+            <UserAvatar size={32} />
+          </div>
+        </div>
+      </div>
+
+      {/* Active Filters Summary */}
+      {activeFilterCount > 0 && (
+        <div className="active-filters-summary mb-3">
+          <div className="d-flex align-items-center justify-content-between">
+            <div className="d-flex align-items-center">
+              <Filter size={16} className="me-2 text-primary" />
+              <span className="text-muted">
+                {activeFilterCount} filter{activeFilterCount !== 1 ? "s" : ""}{" "}
+                applied
+              </span>
+            </div>
+            <button
+              className="btn btn-sm btn-outline-secondary"
+              onClick={handleClearFilters}
+            >
+              Clear All
+            </button>
           </div>
         </div>
       )}
 
-      {/* Ticket Edit Modal */}
-      {selectedTicket && (
-        <EditTicketModal
-          show={showTicketEditModal}
-          handleClose={handleCloseTicketEditModal}
-          ticket={selectedTicket}
-          onTicketUpdate={handleTicketUpdate}
+      {/* Releases Display */}
+      <div className="releases-content-modern">
+        {error ? (
+          <div className="alert alert-danger" role="alert">
+            <i className="bi bi-exclamation-triangle me-2"></i>
+            {error}
+          </div>
+        ) : filteredAndSortedReleases.length > 0 ? (
+          viewMode === "card" ? (
+            <div className="releases-grid-container">
+              {filteredAndSortedReleases.map((release) => (
+                <ReleaseCard key={release.id} release={release} />
+              ))}
+            </div>
+          ) : (
+            <div className="releases-list-container">
+              {filteredAndSortedReleases.map((release) => (
+                <ReleaseListItem key={release.id} release={release} />
+              ))}
+            </div>
+          )
+        ) : (
+          <div className="no-releases-message">
+            <Package size={48} className="no-releases-icon" />
+            <h3>No releases found</h3>
+            <p>
+              {Object.values(releaseFilters).some(
+                (value) =>
+                  value && (Array.isArray(value) ? value.length > 0 : true)
+              )
+                ? "Try adjusting your filters to see more releases."
+                : "Create your first release to get started."}
+            </p>
+            <button
+              className="btn btn-primary"
+              onClick={() => setShowNewReleaseModal(true)}
+            >
+              <Plus size={16} className="me-2" />
+              New Release
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Modals */}
+      {selectedRelease && (
+        <ReleaseModal
+          release={selectedRelease}
+          onClose={() => setSelectedRelease(null)}
+          onUpdateRelease={handleUpdateRelease}
+          onRefreshData={refreshData}
+          showToast={showToast}
+          onTicketClick={handleTicketClick}
         />
       )}
+
+      {selectedTicket && (
+        <TicketModal
+          ticket={selectedTicket}
+          onClose={() => setSelectedTicket(null)}
+          users={users}
+          releases={releases}
+          onUpdateTicket={updateTicket}
+          onRefreshData={refreshData}
+          showToast={showToast}
+        />
+      )}
+
+      {showFilterModal && (
+        <ReleaseFilterModal
+          isOpen={showFilterModal}
+          onClose={() => setShowFilterModal(false)}
+          filters={releaseFilters}
+          onApplyFilters={handleApplyFilters}
+          onClearFilters={handleClearFilters}
+          releases={releases}
+          savedFilters={savedFilters}
+          onSaveFilter={saveFilter}
+          onDeleteSavedFilter={deleteSavedFilter}
+        />
+      )}
+
+      {showSearchModal && (
+        <ReleaseSearchModal
+          isOpen={showSearchModal}
+          onClose={() => setShowSearchModal(false)}
+          releases={releases}
+          onReleaseSelect={(release) => setSelectedRelease(release)}
+        />
+      )}
+
+      {showNewReleaseModal && (
+        <NewReleaseModal
+          isOpen={showNewReleaseModal}
+          onClose={() => setShowNewReleaseModal(false)}
+          onCreateRelease={createRelease}
+          onRefreshData={refreshData}
+          showToast={showToast}
+        />
+      )}
+
+      {/* Toast Notification */}
+      <NotificationToast
+        show={toast.show}
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast({ show: false, message: "", type: "info" })}
+      />
     </div>
   );
 };
