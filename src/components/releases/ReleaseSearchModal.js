@@ -26,15 +26,11 @@ const ReleaseSearchModal = ({ isOpen, onClose, releases, onReleaseSelect }) => {
     const term = searchTerm.toLowerCase();
     const filtered = releases.filter((release) => {
       const name = (release.name || "").toLowerCase();
-      const version = (release.version || "").toLowerCase();
       const description = (release.description || "").toLowerCase();
       const id = (release.id || "").toString().toLowerCase();
 
       return (
-        name.includes(term) ||
-        version.includes(term) ||
-        description.includes(term) ||
-        id.includes(term)
+        name.includes(term) || description.includes(term) || id.includes(term)
       );
     });
 
@@ -140,7 +136,7 @@ const ReleaseSearchModal = ({ isOpen, onClose, releases, onReleaseSelect }) => {
             <input
               ref={searchInputRef}
               type="text"
-              placeholder="Search releases by name, version, or description..."
+              placeholder="Search by Release Name or Description"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="search-input"
@@ -187,15 +183,6 @@ const ReleaseSearchModal = ({ isOpen, onClose, releases, onReleaseSelect }) => {
                     )}
                   </div>
 
-                  {release.version && (
-                    <div className="search-result-version">
-                      <Package size={14} className="version-icon" />
-                      <span className="version-text">
-                        {highlightMatch(release.version, searchTerm)}
-                      </span>
-                    </div>
-                  )}
-
                   {release.description && (
                     <div className="search-result-description">
                       {highlightMatch(
@@ -232,7 +219,7 @@ const ReleaseSearchModal = ({ isOpen, onClose, releases, onReleaseSelect }) => {
             <div className="search-placeholder">
               <Search size={48} className="placeholder-icon" />
               <p>Start typing to search releases</p>
-              <span>Search by release name, version, or description</span>
+              <span>Search by Release Name or Description</span>
             </div>
           )}
         </div>

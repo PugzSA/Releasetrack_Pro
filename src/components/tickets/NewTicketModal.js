@@ -146,14 +146,14 @@ const NewTicketModal = ({
 
         {/* Header Section */}
         <div className="ticket-modal-header-modern">
+          <div className="ticket-modal-title-section">
+            <div className="ticket-modal-id">New Ticket</div>
+          </div>
           <div className="d-flex align-items-start mb-3">
             <div className="flex-grow-1">
-              <div className="mb-2">
-                <h1 className="ticket-modal-title">New Ticket</h1>
-              </div>
               <input
                 type="text"
-                className="ticket-modal-textarea"
+                className="ticket-modal-title-input"
                 placeholder="Enter ticket title..."
                 value={formData.title}
                 onChange={(e) => handleInputChange("title", e.target.value)}
