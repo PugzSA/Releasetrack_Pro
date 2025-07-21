@@ -8,6 +8,9 @@ import {
   CheckCircle,
   XCircle,
 } from "lucide-react";
+import FileUpload from "../attachments/FileUpload";
+import AttachmentList from "../attachments/AttachmentList";
+import { useApp } from "../../context/AppContext";
 
 const TicketModal = ({
   ticket,
@@ -20,10 +23,20 @@ const TicketModal = ({
 }) => {
   if (!ticket) return null;
 
+  // Get current user from context
+  const { user } = useApp();
+
+  // Find current user ID by matching email
+  const currentUser = users.find((u) => u.email === user?.email);
+  const currentUserId = currentUser?.id;
+
   // State for dynamic priority to update the dot color
   const [selectedPriority, setSelectedPriority] = useState(
     ticket.priority || "Medium"
   );
+
+  // State for attachment management
+  const [attachmentKey, setAttachmentKey] = useState(0);
 
   // State for all editable form fields
   const [formData, setFormData] = useState({
@@ -147,6 +160,29 @@ const TicketModal = ({
         showToast("Error updating ticket. Please try again.", "danger");
       }
     }
+  };
+
+  // Attachment event handlers
+  const handleAttachmentUploadComplete = (attachment) => {
+    if (showToast) {
+      showToast(
+        `File "${attachment.file_name}" uploaded successfully`,
+        "success"
+      );
+    }
+    // Refresh attachment list by updating key
+    setAttachmentKey((prev) => prev + 1);
+  };
+
+  const handleAttachmentUploadError = (error) => {
+    if (showToast) {
+      showToast(error, "error");
+    }
+  };
+
+  const handleAttachmentDeleted = (attachmentId) => {
+    // Refresh attachment list by updating key
+    setAttachmentKey((prev) => prev + 1);
   };
 
   const assignedUser = users.find((u) => u.id === ticket.assigned_to);
@@ -375,6 +411,30 @@ const TicketModal = ({
               placeholder="Add any notes related to testing requirements or results"
               value={formData.testNotes}
               onChange={(e) => handleInputChange("testNotes", e.target.value)}
+            />
+          </div>
+
+          {/* Attachments Section */}
+          <div className="ticket-modal-field mb-4">
+            <label className="ticket-modal-label">Attachments:</label>
+
+            {/* File Upload Component */}
+            {currentUserId && (
+              <FileUpload
+                ticketId={ticket.id}
+                uploadedBy={currentUserId}
+                onUploadComplete={handleAttachmentUploadComplete}
+                onUploadError={handleAttachmentUploadError}
+              />
+            )}
+
+            {/* Attachment List Component */}
+            <AttachmentList
+              key={attachmentKey}
+              ticketId={ticket.id}
+              onAttachmentDeleted={handleAttachmentDeleted}
+              showToast={showToast}
+              currentUserId={currentUserId}
             />
           </div>
 

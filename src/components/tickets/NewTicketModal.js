@@ -365,6 +365,15 @@ const NewTicketModal = ({
               onChange={(e) => handleInputChange("testNotes", e.target.value)}
             />
           </div>
+
+          {/* Attachments Note */}
+          <div className="ticket-modal-field mb-4">
+            <div className="alert alert-info" role="alert">
+              <strong>📎 Attachments:</strong> You can add file attachments
+              after creating the ticket by opening it and using the attachment
+              upload feature.
+            </div>
+          </div>
         </div>
 
         {/* Footer */}
