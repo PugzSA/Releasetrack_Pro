@@ -159,6 +159,29 @@
   z-index: 1;
 }
 
+.clear-filter-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 2;
+}
+
+.clear-filter-btn:hover {
+  color: #ef4444;
+  background-color: #fef2f2;
+}
+
 .clear-selection {
   position: absolute;
   right: 12px;

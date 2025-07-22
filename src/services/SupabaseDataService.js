@@ -286,6 +286,29 @@ class SupabaseDataService {
 
   async createMetadataItem(metadataData) {
     try {
+      // Generate a unique metadata ID if not provided
+      if (!metadataData.id) {
+        // Get the highest existing metadata number
+        const { data: existingMetadata, error: fetchError } = await supabase
+          .from("metadata")
+          .select("id")
+          .like("id", "META-%")
+          .order("id", { ascending: false })
+          .limit(1);
+
+        if (fetchError) throw fetchError;
+
+        let nextNumber = 1;
+        if (existingMetadata && existingMetadata.length > 0) {
+          const lastId = existingMetadata[0].id;
+          const lastNumber = parseInt(lastId.replace("META-", ""));
+          nextNumber = lastNumber + 1;
+        }
+
+        // Format the ID with leading zeros (e.g., META-00001)
+        metadataData.id = `META-${nextNumber.toString().padStart(5, "0")}`;
+      }
+
       const { data, error } = await supabase
         .from("metadata")
         .insert(metadataData)
