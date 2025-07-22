@@ -794,6 +794,180 @@
   color: #475569;
 }
 
+/* Ticket Modal Tabs */
+.ticket-modal-tabs {
+  display: flex;
+  border-bottom: 1px solid #e9ecef;
+  background: #f8f9fa;
+  margin: 0;
+  padding: 0;
+}
+
+.ticket-modal-tab {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  background: transparent;
+  color: #6c757d;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.ticket-modal-tab:hover:not(.disabled) {
+  background: rgba(102, 126, 234, 0.1);
+  color: #495057;
+}
+
+.ticket-modal-tab.active {
+  background: white;
+  color: #667eea;
+  border-bottom: 2px solid #667eea;
+}
+
+.ticket-modal-tab.disabled {
+  color: #adb5bd;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.ticket-modal-tab.disabled:hover {
+  background: transparent;
+  color: #adb5bd;
+}
+
+.metadata-count {
+  background: #667eea;
+  color: white;
+  border-radius: 10px;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  min-width: 18px;
+  text-align: center;
+}
+
+.ticket-modal-tab.disabled .metadata-count {
+  background: #adb5bd;
+}
+
+/* Related Metadata Content */
+.related-metadata-content {
+  padding: 0;
+}
+
+.metadata-header h5 {
+  color: #495057;
+  font-weight: 600;
+}
+
+.metadata-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.metadata-item-row {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 16px;
+  transition: all 0.2s ease;
+}
+
+.metadata-item-row:hover {
+  background: #e9ecef;
+  border-color: #dee2e6;
+}
+
+.metadata-id {
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: #667eea;
+  background: rgba(102, 126, 234, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.metadata-name {
+  color: #495057;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.metadata-api-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.api-name-label {
+  font-size: 12px;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.api-name-value {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 11px;
+  color: #495057;
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+  font-weight: 500;
+}
+
+.metadata-details {
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.metadata-description {
+  font-size: 12px;
+  color: #6c757d;
+  font-style: italic;
+}
+
+.status-badge {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.new,
+.status-badge.create {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-badge.modified,
+.status-badge.update {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-badge.deleted,
+.status-badge.remove {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.empty-metadata-state {
+  color: #6c757d;
+  font-style: italic;
+}
+
 /* Sort Button Styling */
 .btn-outline-secondary {
   border-color: #e2e8f0;

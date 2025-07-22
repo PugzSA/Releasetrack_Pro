@@ -360,6 +360,21 @@ class SupabaseDataService {
     }
   }
 
+  async getMetadataByTicketId(ticketId) {
+    try {
+      const { data, error } = await supabase
+        .from("metadata")
+        .select("*")
+        .eq("ticket_id", ticketId)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error(`Error fetching metadata for ticket ${ticketId}:`, error);
+      throw error;
+    }
+  }
+
   // Saved Filters
   async getSavedFilters(filterType) {
     try {
