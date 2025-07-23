@@ -968,6 +968,14 @@
   font-style: italic;
 }
 
+/* Comments Content */
+.comments-content {
+  padding: 0;
+  height: 450px;
+  display: flex;
+  flex-direction: column;
+}
+
 /* Sort Button Styling */
 .btn-outline-secondary {
   border-color: #e2e8f0;

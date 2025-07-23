@@ -148,36 +148,7 @@ const EditTicketModal = ({ show, handleClose, ticket, onTicketUpdate }) => {
         notificationSent = true;
       }
 
-      // Show notification if assignee was changed
-      else if (ticket.assignee_id !== formattedData.assignee_id) {
-        // Get assignee name for display
-        let assigneeName = "Unassigned";
-        if (formattedData.assignee_id) {
-          const selectedUser = users.find(
-            (user) => user.id === parseInt(formattedData.assignee_id)
-          );
-          if (selectedUser) {
-            assigneeName = `${selectedUser.firstName} ${selectedUser.lastName}`;
-          }
-        }
-
-        let previousAssigneeName = "Unassigned";
-        if (ticket.assignee_id) {
-          const prevUser = users.find(
-            (user) => user.id === parseInt(ticket.assignee_id)
-          );
-          if (prevUser) {
-            previousAssigneeName = `${prevUser.firstName} ${prevUser.lastName}`;
-          }
-        }
-
-        setNotification({
-          show: true,
-          message: `Email notification sent for ticket reassignment: ${previousAssigneeName} → ${assigneeName}`,
-          variant: "info",
-        });
-        notificationSent = true;
-      }
+      // Note: Email notifications are now handled automatically by the SupabaseDataService
 
       // Close modal after short delay to show success message
       setTimeout(() => {

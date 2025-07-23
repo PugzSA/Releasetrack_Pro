@@ -6,8 +6,6 @@ import "./UserAvatar.css";
 const getCleanAvatarUrl = (url) => {
   if (!url) return null;
   try {
-    console.log("Original URL:", url);
-
     // For Google URLs, we'll use a more reliable approach
     // Google avatar URLs often have CORS issues, so we'll be more conservative
     let cleanUrl = url;
@@ -25,7 +23,6 @@ const getCleanAvatarUrl = (url) => {
       cleanUrl = `${cleanUrl}=s96-c`;
     }
 
-    console.log("Cleaned URL:", cleanUrl);
     return cleanUrl;
   } catch (error) {
     console.error("Error cleaning avatar URL:", error);
@@ -92,9 +89,6 @@ const UserAvatar = ({ size = 32 }) => {
 
       // Set a timeout to fallback to placeholder if image doesn't load
       const timeout = setTimeout(() => {
-        console.log(
-          `Avatar load timeout (${timeoutDuration}ms) - showing placeholder`
-        );
         setShowPlaceholder(true);
         setCurrentAvatarUrl(null);
       }, timeoutDuration);
@@ -114,17 +108,6 @@ const UserAvatar = ({ size = 32 }) => {
       }
     };
   }, [imageLoadTimeout]);
-
-  // Debug logging for avatar issues
-  console.log("=== UserAvatar Debug ===");
-  console.log("Session exists:", !!session);
-  console.log("User metadata:", session?.user?.user_metadata);
-  console.log("Raw avatar URL:", rawAvatarUrl);
-  console.log("Current avatar URL:", currentAvatarUrl);
-  console.log("Show placeholder:", showPlaceholder);
-  console.log("URL attempt:", urlAttempt);
-  console.log("User name:", userName);
-  console.log("========================");
 
   const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
     <a
@@ -155,11 +138,6 @@ const UserAvatar = ({ size = 32 }) => {
               alt={userName}
               className="user-avatar-image"
               onError={(e) => {
-                console.log("=== Avatar Image Load Error ===");
-                console.log("Failed URL:", e.target.src);
-                console.log("Attempt number:", urlAttempt + 1);
-                console.log("================================");
-
                 // Clear the timeout since we're handling the error
                 if (imageLoadTimeout) {
                   clearTimeout(imageLoadTimeout);
@@ -171,30 +149,15 @@ const UserAvatar = ({ size = 32 }) => {
                 const nextAttempt = urlAttempt + 1;
 
                 if (nextAttempt < alternativeUrls.length) {
-                  console.log(
-                    "Trying alternative URL:",
-                    alternativeUrls[nextAttempt]
-                  );
                   setCurrentAvatarUrl(alternativeUrls[nextAttempt]);
                   setUrlAttempt(nextAttempt);
                 } else {
-                  console.log("All URL attempts failed, showing placeholder");
                   // Show placeholder instead of broken image
                   setShowPlaceholder(true);
                   setCurrentAvatarUrl(null);
                 }
               }}
               onLoad={(e) => {
-                console.log("=== Avatar Image Load Success ===");
-                console.log("Loaded URL:", e.target.src);
-                console.log(
-                  "Image dimensions:",
-                  e.target.naturalWidth,
-                  "x",
-                  e.target.naturalHeight
-                );
-                console.log("==================================");
-
                 // Clear the timeout since image loaded successfully
                 if (imageLoadTimeout) {
                   clearTimeout(imageLoadTimeout);

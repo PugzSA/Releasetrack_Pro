@@ -7,10 +7,12 @@ import {
   AlertCircle,
   CheckCircle,
   XCircle,
+  MessageCircle,
 } from "lucide-react";
 import FileUpload from "../attachments/FileUpload";
 import AttachmentList from "../attachments/AttachmentList";
 import MetadataCard from "../metadata/MetadataCard";
+import CommentSection from "../comments/CommentSection";
 import { useApp } from "../../context/AppContext";
 
 const TicketModal = ({
@@ -43,6 +45,7 @@ const TicketModal = ({
   const [activeTab, setActiveTab] = useState("details");
   const [relatedMetadata, setRelatedMetadata] = useState([]);
   const [loadingMetadata, setLoadingMetadata] = useState(false);
+  const [commentsCount, setCommentsCount] = useState(0);
 
   // State for all editable form fields
   const [formData, setFormData] = useState({
@@ -119,6 +122,28 @@ const TicketModal = ({
     };
 
     fetchRelatedMetadata();
+  }, [ticket?.id, supabase]);
+
+  // Fetch comments count when ticket changes
+  useEffect(() => {
+    const fetchCommentsCount = async () => {
+      if (!ticket?.id || !supabase) return;
+
+      try {
+        const { count, error } = await supabase
+          .from("comments")
+          .select("*", { count: "exact", head: true })
+          .eq("ticket_id", ticket.id);
+
+        if (error) throw error;
+        setCommentsCount(count || 0);
+      } catch (error) {
+        console.error("Error fetching comments count:", error);
+        setCommentsCount(0);
+      }
+    };
+
+    fetchCommentsCount();
   }, [ticket?.id, supabase]);
 
   const getStatusIcon = (status) => {
@@ -262,6 +287,18 @@ const TicketModal = ({
           </button>
           <button
             className={`ticket-modal-tab ${
+              activeTab === "comments" ? "active" : ""
+            }`}
+            onClick={() => setActiveTab("comments")}
+          >
+            <MessageCircle size={14} className="me-1" />
+            Comments
+            {commentsCount > 0 && (
+              <span className="metadata-count">({commentsCount})</span>
+            )}
+          </button>
+          <button
+            className={`ticket-modal-tab ${
               activeTab === "metadata" ? "active" : ""
             } ${relatedMetadata.length === 0 ? "disabled" : ""}`}
             onClick={() =>
@@ -269,7 +306,7 @@ const TicketModal = ({
             }
             disabled={relatedMetadata.length === 0}
           >
-            Related Metadata
+            Metadata
             {relatedMetadata.length > 0 && (
               <span className="metadata-count">({relatedMetadata.length})</span>
             )}
@@ -523,6 +560,17 @@ const TicketModal = ({
                 </div>
               )}
             </>
+          )}
+
+          {activeTab === "comments" && (
+            <div className="comments-content">
+              <CommentSection
+                ticketId={ticket.id}
+                ticket={ticket}
+                users={users}
+                showToast={showToast}
+              />
+            </div>
           )}
 
           {activeTab === "metadata" && (

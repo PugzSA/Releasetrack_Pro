@@ -155,6 +155,13 @@ export const AppProvider = ({ children }) => {
     saveFilter: (filter) => handleDataUpdate("saveFilter", filter),
     deleteSavedFilter: (id) => handleDataUpdate("deleteSavedFilter", id),
     selectSavedFilter,
+
+    // Comments
+    getCommentsByTicketId: (ticketId) =>
+      dataService.getCommentsByTicketId(ticketId),
+    createComment: (data) => handleDataUpdate("createComment", data),
+    updateComment: (id, data) => handleDataUpdate("updateComment", id, data),
+    deleteComment: (id) => handleDataUpdate("deleteComment", id),
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

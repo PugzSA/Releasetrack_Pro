@@ -11,19 +11,15 @@ import { Toast, ToastContainer } from "react-bootstrap";
  * @param {Function} props.onClose Function to call when toast is closed
  */
 const NotificationToast = ({ show, message, variant = "success", onClose }) => {
-  console.log("NotificationToast props received:", { show, message, variant });
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    console.log("NotificationToast useEffect triggered:", { show, visible });
     setVisible(show);
 
     // Auto-hide after 3 seconds
     let timer;
     if (show) {
-      console.log("Setting up timer for auto-hide");
       timer = setTimeout(() => {
-        console.log("Auto-hiding toast");
         setVisible(false);
         if (onClose) onClose();
       }, 3000);
@@ -85,8 +81,6 @@ const NotificationToast = ({ show, message, variant = "success", onClose }) => {
     }
   };
 
-  console.log("About to render toast with visible:", visible);
-
   const toastContent = (
     <ToastContainer
       position="top-center"
@@ -102,7 +96,6 @@ const NotificationToast = ({ show, message, variant = "success", onClose }) => {
       <Toast
         show={visible}
         onClose={() => {
-          console.log("Toast close button clicked");
           setVisible(false);
           if (onClose) onClose();
         }}
@@ -157,7 +150,6 @@ const NotificationToast = ({ show, message, variant = "success", onClose }) => {
           fontWeight: "500",
         }}
         onClick={() => {
-          console.log("Simple toast clicked");
           setVisible(false);
           if (onClose) onClose();
         }}

@@ -1,4 +1,5 @@
 import { supabase } from "./supabase";
+import emailService from "./EmailService";
 
 class SupabaseDataService {
   // Auth
@@ -241,6 +242,19 @@ class SupabaseDataService {
     try {
       console.log("Updating ticket with data:", { id, ticketData });
 
+      // Get the original ticket data before updating
+      const { data: originalTicket, error: fetchError } = await supabase
+        .from("tickets")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (fetchError) {
+        console.error("Error fetching original ticket:", fetchError);
+        throw fetchError;
+      }
+
+      // Update the ticket
       const { data, error } = await supabase
         .from("tickets")
         .update(ticketData)
@@ -254,10 +268,259 @@ class SupabaseDataService {
       }
 
       console.log("Ticket updated successfully:", data);
+
+      // Check for changes that require email notifications
+      await this.handleTicketUpdateNotifications(originalTicket, data);
+
       return data;
     } catch (error) {
       console.error(`Error updating ticket ${id}:`, error);
       throw error;
+    }
+  }
+
+  /**
+   * Handle email notifications for ticket updates
+   * @param {Object} originalTicket - The original ticket data before update
+   * @param {Object} updatedTicket - The updated ticket data after update
+   */
+  async handleTicketUpdateNotifications(originalTicket, updatedTicket) {
+    try {
+      // Initialize email service with supabase
+      emailService.setSupabase(supabase);
+
+      // Get current user from auth session
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      // Get all users for recipient lookup
+      const { data: users, error: usersError } = await supabase
+        .from("users")
+        .select("*");
+
+      if (usersError) {
+        console.error("Error fetching users for notifications:", usersError);
+        return;
+      }
+
+      // Check for status change
+      if (originalTicket.status !== updatedTicket.status) {
+        console.log(
+          `📧 Status changed: ${originalTicket.status} → ${updatedTicket.status}`
+        );
+        await this.sendStatusChangeNotification(
+          originalTicket,
+          updatedTicket,
+          user,
+          users
+        );
+      }
+
+      // Check for assignee change
+      if (originalTicket.assignee_id !== updatedTicket.assignee_id) {
+        console.log(
+          `📧 Assignee changed: ${originalTicket.assignee_id} → ${updatedTicket.assignee_id}`
+        );
+        await this.sendAssigneeChangeNotification(
+          originalTicket,
+          updatedTicket,
+          user,
+          users
+        );
+      }
+    } catch (error) {
+      console.error("Error handling ticket update notifications:", error);
+      // Don't throw error - notifications shouldn't break ticket updates
+    }
+  }
+
+  /**
+   * Send status change notification email
+   */
+  async sendStatusChangeNotification(
+    originalTicket,
+    updatedTicket,
+    currentUser,
+    users
+  ) {
+    try {
+      // Build recipients list (assignee and requester)
+      const recipients = [];
+
+      // Add assignee if exists
+      if (updatedTicket.assignee_id) {
+        const assignee = users.find((u) => u.id === updatedTicket.assignee_id);
+        if (assignee) {
+          recipients.push({
+            id: assignee.id,
+            email: assignee.email,
+            name: `${assignee.firstName} ${assignee.lastName}`,
+          });
+        }
+      }
+
+      // Add requester if exists and different from assignee
+      if (
+        updatedTicket.requester_id &&
+        updatedTicket.requester_id !== updatedTicket.assignee_id
+      ) {
+        const requester = users.find(
+          (u) => u.id === updatedTicket.requester_id
+        );
+        if (requester) {
+          recipients.push({
+            id: requester.id,
+            email: requester.email,
+            name: `${requester.firstName} ${requester.lastName}`,
+          });
+        }
+      }
+
+      if (recipients.length === 0) {
+        console.log("No recipients found for status change notification");
+        return;
+      }
+
+      console.log(
+        `📧 Sending status change email to: ${recipients
+          .map((r) => r.email)
+          .join(", ")}`
+      );
+
+      // Ensure the ticket object has the assignee name for the email template
+      const ticketWithAssigneeName = { ...updatedTicket };
+      if (updatedTicket.assignee_id) {
+        const assignee = users.find((u) => u.id === updatedTicket.assignee_id);
+        if (assignee) {
+          ticketWithAssigneeName.assignee = `${assignee.firstName} ${assignee.lastName}`;
+        }
+      } else {
+        ticketWithAssigneeName.assignee = "Unassigned";
+      }
+
+      // Send the email
+      const result = await emailService.sendTicketStatusChangeEmail({
+        ticket: ticketWithAssigneeName,
+        previousStatus: originalTicket.status,
+        user: {
+          id: currentUser?.id,
+          email: currentUser?.email,
+          name: currentUser?.user_metadata?.full_name || currentUser?.email,
+        },
+        recipients,
+      });
+
+      console.log("Status change email result:", result);
+    } catch (error) {
+      console.error("Error sending status change notification:", error);
+    }
+  }
+
+  /**
+   * Send assignee change notification email
+   */
+  async sendAssigneeChangeNotification(
+    originalTicket,
+    updatedTicket,
+    currentUser,
+    users
+  ) {
+    try {
+      // Build recipients list (old assignee, new assignee, and requester)
+      const recipients = [];
+
+      // Add old assignee if exists
+      if (originalTicket.assignee_id) {
+        const oldAssignee = users.find(
+          (u) => u.id === originalTicket.assignee_id
+        );
+        if (oldAssignee) {
+          recipients.push({
+            id: oldAssignee.id,
+            email: oldAssignee.email,
+            name: `${oldAssignee.firstName} ${oldAssignee.lastName}`,
+          });
+        }
+      }
+
+      // Add new assignee if exists and different from old assignee
+      if (
+        updatedTicket.assignee_id &&
+        updatedTicket.assignee_id !== originalTicket.assignee_id
+      ) {
+        const newAssignee = users.find(
+          (u) => u.id === updatedTicket.assignee_id
+        );
+        if (newAssignee) {
+          recipients.push({
+            id: newAssignee.id,
+            email: newAssignee.email,
+            name: `${newAssignee.firstName} ${newAssignee.lastName}`,
+          });
+        }
+      }
+
+      // Add requester if exists and not already in recipients
+      if (updatedTicket.requester_id) {
+        const requester = users.find(
+          (u) => u.id === updatedTicket.requester_id
+        );
+        if (requester && !recipients.find((r) => r.id === requester.id)) {
+          recipients.push({
+            id: requester.id,
+            email: requester.email,
+            name: `${requester.firstName} ${requester.lastName}`,
+          });
+        }
+      }
+
+      if (recipients.length === 0) {
+        console.log("No recipients found for assignee change notification");
+        return;
+      }
+
+      console.log(
+        `📧 Sending assignee change email to: ${recipients
+          .map((r) => r.email)
+          .join(", ")}`
+      );
+
+      // Get previous assignee name
+      const previousAssignee = originalTicket.assignee_id
+        ? users.find((u) => u.id === originalTicket.assignee_id)?.firstName +
+          " " +
+          users.find((u) => u.id === originalTicket.assignee_id)?.lastName
+        : "Unassigned";
+
+      // Ensure the ticket object has the new assignee name for the email template
+      const ticketWithAssigneeName = { ...updatedTicket };
+      if (updatedTicket.assignee_id) {
+        const newAssignee = users.find(
+          (u) => u.id === updatedTicket.assignee_id
+        );
+        if (newAssignee) {
+          ticketWithAssigneeName.assignee = `${newAssignee.firstName} ${newAssignee.lastName}`;
+        }
+      } else {
+        ticketWithAssigneeName.assignee = "Unassigned";
+      }
+
+      // Send the email
+      const result = await emailService.sendAssigneeChangeEmail({
+        ticket: ticketWithAssigneeName,
+        previousAssignee,
+        user: {
+          id: currentUser?.id,
+          email: currentUser?.email,
+          name: currentUser?.user_metadata?.full_name || currentUser?.email,
+        },
+        recipients,
+      });
+
+      console.log("Assignee change email result:", result);
+    } catch (error) {
+      console.error("Error sending assignee change notification:", error);
     }
   }
 
@@ -417,6 +680,71 @@ class SupabaseDataService {
       return true;
     } catch (error) {
       console.error(`Error deleting filter ${filterId}:`, error);
+      throw error;
+    }
+  }
+
+  // Comments Management
+  async getCommentsByTicketId(ticketId) {
+    try {
+      const { data, error } = await supabase
+        .from("comments")
+        .select("*")
+        .eq("ticket_id", ticketId)
+        .order("created_at", { ascending: true });
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+      throw error;
+    }
+  }
+
+  async createComment(commentData) {
+    try {
+      const { data, error } = await supabase
+        .from("comments")
+        .insert([commentData])
+        .select("*")
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error("Error creating comment:", error);
+      throw error;
+    }
+  }
+
+  async updateComment(commentId, commentData) {
+    try {
+      const { data, error } = await supabase
+        .from("comments")
+        .update(commentData)
+        .eq("id", commentId)
+        .select("*")
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error("Error updating comment:", error);
+      throw error;
+    }
+  }
+
+  async deleteComment(commentId) {
+    try {
+      const { error } = await supabase
+        .from("comments")
+        .delete()
+        .eq("id", commentId);
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error("Error deleting comment:", error);
       throw error;
     }
   }
