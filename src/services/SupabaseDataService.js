@@ -304,6 +304,11 @@ class SupabaseDataService {
         return;
       }
 
+      // Find the current user in the users table by email
+      const currentUserRecord = user
+        ? users.find((u) => u.email === user.email)
+        : null;
+
       // Check for status change
       if (originalTicket.status !== updatedTicket.status) {
         console.log(
@@ -312,7 +317,7 @@ class SupabaseDataService {
         await this.sendStatusChangeNotification(
           originalTicket,
           updatedTicket,
-          user,
+          currentUserRecord,
           users
         );
       }
@@ -325,7 +330,7 @@ class SupabaseDataService {
         await this.sendAssigneeChangeNotification(
           originalTicket,
           updatedTicket,
-          user,
+          currentUserRecord,
           users
         );
       }
@@ -406,7 +411,9 @@ class SupabaseDataService {
         user: {
           id: currentUser?.id,
           email: currentUser?.email,
-          name: currentUser?.user_metadata?.full_name || currentUser?.email,
+          name: currentUser
+            ? `${currentUser.firstName} ${currentUser.lastName}`
+            : "Unknown User",
         },
         recipients,
       });
@@ -513,7 +520,9 @@ class SupabaseDataService {
         user: {
           id: currentUser?.id,
           email: currentUser?.email,
-          name: currentUser?.user_metadata?.full_name || currentUser?.email,
+          name: currentUser
+            ? `${currentUser.firstName} ${currentUser.lastName}`
+            : "Unknown User",
         },
         recipients,
       });

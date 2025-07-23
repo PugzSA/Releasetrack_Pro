@@ -1031,19 +1031,30 @@ class EmailService {
             recipientIds: [mentionedUser.id],
           });
 
-          // Log the notification (optional - can be implemented later)
+          // Log the notification
           if (emailResult.success) {
             console.log(
               `📧 Successfully sent mention email to ${mentionedUser.email} for ticket ${ticket.id}`
             );
-            // TODO: Implement logNotification method if needed for audit trail
-            // await this.logNotification({
-            //   userId: mentionedUser.id,
-            //   type: "mention",
-            //   ticketId: ticket.id,
-            //   emailSent: true,
-            //   emailContent: html,
-            // });
+
+            // Find the commenter in the users table by email to get their ID
+            const commenterRecord = allUsers.find(
+              (u) => u.email === commenter.email
+            );
+
+            await this.logEmailNotification({
+              type: "mention",
+              ticketId: ticket.id,
+              recipients: [mentionedUser.id],
+              senderId: commenterRecord?.id,
+              metadata: {
+                mentionedUser: mentionedUser.email,
+                commenterName: commenterName,
+                commentContent:
+                  comment.content.substring(0, 200) +
+                  (comment.content.length > 200 ? "..." : ""),
+              },
+            });
           }
 
           return {
