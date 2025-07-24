@@ -12,6 +12,10 @@
   },
   "dependencies": {
     "@craco/craco": "^7.1.0",
+    "@nivo/bar": "^0.99.0",
+    "@nivo/core": "^0.99.0",
+    "@nivo/line": "^0.99.0",
+    "@nivo/pie": "^0.99.0",
     "@supabase/supabase-js": "^2.50.3",
     "axios": "^1.4.0",
     "body-parser": "^2.2.0",

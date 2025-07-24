@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Modal, Button, Form, Row, Col, Alert } from "react-bootstrap";
+import { X, User } from "lucide-react";
 import { useApp } from "../../context/AppContext";
 import NotificationToast from "../common/NotificationToast";
+import "./Tickets.css";
 
 const EditTicketModal = ({ show, handleClose, ticket, onTicketUpdate }) => {
   const { updateTicket, releases, supabase } = useApp();
@@ -163,6 +164,8 @@ const EditTicketModal = ({ show, handleClose, ticket, onTicketUpdate }) => {
     }
   };
 
+  if (!show) return null;
+
   return (
     <>
       <NotificationToast
@@ -172,245 +175,299 @@ const EditTicketModal = ({ show, handleClose, ticket, onTicketUpdate }) => {
         onClose={() => setNotification({ ...notification, show: false })}
       />
 
-      <Modal show={show} onHide={handleClose} size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title>Edit Ticket {ticket?.id}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {error && <Alert variant="danger">{error}</Alert>}
+      <div className="ticket-modal-backdrop" onClick={handleClose}>
+        <div
+          className="ticket-modal-modern"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button onClick={handleClose} className="ticket-modal-close-btn">
+            <X size={20} />
+          </button>
 
-          {success && (
-            <Alert variant="success">Ticket updated successfully!</Alert>
-          )}
+          {/* Header with gradient background matching main modal */}
+          <div className="ticket-modal-header">
+            <div>
+              <div className="ticket-modal-id">{ticket?.id}</div>
+              <h2 className="ticket-modal-title">
+                {formData.title || "Edit Ticket"}
+              </h2>
+            </div>
+          </div>
 
-          <Form onSubmit={handleSubmit}>
-            <Row>
-              <Col md={4}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Ticket ID</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="id"
-                    value={ticket?.id || ""}
-                    readOnly
-                    disabled
-                    className="bg-light"
-                  />
-                </Form.Group>
-              </Col>
+          {/* Modal Body */}
+          <div className="ticket-modal-body-modern">
+            {error && (
+              <div className="alert alert-danger mb-3" role="alert">
+                {error}
+              </div>
+            )}
+            {success && (
+              <div className="alert alert-success mb-3" role="alert">
+                Ticket updated successfully!
+              </div>
+            )}
 
-              <Col md={4}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Requester</Form.Label>
-                  <Form.Select
-                    name="requester_id"
-                    value={formData.requester_id || ""}
-                    onChange={handleChange}
-                  >
-                    <option value="">None</option>
-                    {users.map((user) => (
-                      <option key={user.id} value={user.id}>
-                        {user.firstName} {user.lastName}
+            <form onSubmit={handleSubmit}>
+              {/* Row 1: Ticket ID & Title */}
+              <div className="row mb-4">
+                <div className="col-md-6">
+                  <div className="ticket-modal-field">
+                    <label className="ticket-modal-label">Ticket ID</label>
+                    <input
+                      type="text"
+                      className="ticket-modal-input"
+                      value={ticket?.id || ""}
+                      disabled
+                      style={{ backgroundColor: "#f8f9fa", color: "#6c757d" }}
+                    />
+                  </div>
+                </div>
+                <div className="col-md-6">
+                  <div className="ticket-modal-field">
+                    <label className="ticket-modal-label">Title*</label>
+                    <input
+                      type="text"
+                      name="title"
+                      className="ticket-modal-input"
+                      value={formData.title}
+                      onChange={handleChange}
+                      placeholder="Enter ticket title"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Row 2: Requester & Assignee */}
+              <div className="row mb-4">
+                <div className="col-md-6">
+                  <div className="ticket-modal-field">
+                    <label className="ticket-modal-label">Requester:</label>
+                    <div className="d-flex align-items-center">
+                      <User size={16} className="me-2 text-muted" />
+                      <select
+                        className="ticket-modal-select-with-icon"
+                        name="requester_id"
+                        value={formData.requester_id || ""}
+                        onChange={handleChange}
+                      >
+                        <option value="">Select Requester</option>
+                        {users.map((user) => (
+                          <option key={user.id} value={user.id}>
+                            {user.firstName} {user.lastName}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <small className="text-muted">
+                      Who requested this ticket
+                    </small>
+                  </div>
+                </div>
+
+                <div className="col-md-6">
+                  <div className="ticket-modal-field">
+                    <label className="ticket-modal-label">Assignee:</label>
+                    <div className="d-flex align-items-center">
+                      <User size={16} className="me-2 text-muted" />
+                      <select
+                        className="ticket-modal-select-with-icon"
+                        name="assignee_id"
+                        value={formData.assignee_id || ""}
+                        onChange={handleChange}
+                      >
+                        <option value="">Select Assignee</option>
+                        {users.map((user) => (
+                          <option key={user.id} value={user.id}>
+                            {user.firstName} {user.lastName}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <small className="text-muted">
+                      Who is working on this ticket
+                    </small>
+                  </div>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div className="ticket-modal-field mb-4">
+                <label className="ticket-modal-label">Description</label>
+                <textarea
+                  name="description"
+                  className="ticket-modal-textarea"
+                  value={formData.description}
+                  onChange={handleChange}
+                  rows={3}
+                  placeholder="Detailed description of this ticket"
+                />
+              </div>
+
+              {/* Row 3: Type, Priority, Status */}
+              <div className="row mb-4">
+                <div className="col-md-4">
+                  <div className="ticket-modal-field">
+                    <label className="ticket-modal-label">Type*</label>
+                    <select
+                      className="ticket-modal-select"
+                      name="type"
+                      value={formData.type}
+                      onChange={handleChange}
+                      required
+                    >
+                      <option value="Enhancement">Enhancement</option>
+                      <option value="Issue">Issue</option>
+                      <option value="New Feature">New Feature</option>
+                      <option value="Request">Request</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="col-md-4">
+                  <div className="ticket-modal-field">
+                    <label className="ticket-modal-label">Priority*</label>
+                    <select
+                      className="ticket-modal-select"
+                      name="priority"
+                      value={formData.priority}
+                      onChange={handleChange}
+                      required
+                    >
+                      <option value="Low">Low</option>
+                      <option value="Medium">Medium</option>
+                      <option value="High">High</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="col-md-4">
+                  <div className="ticket-modal-field">
+                    <label className="ticket-modal-label">Status*</label>
+                    <select
+                      className="ticket-modal-select"
+                      name="status"
+                      value={formData.status}
+                      onChange={handleChange}
+                      required
+                    >
+                      <option value="Backlog">Backlog</option>
+                      <option value="Cancelled">Cancelled</option>
+                      <option value="Requirements Gathering">
+                        Requirements Gathering
                       </option>
-                    ))}
-                  </Form.Select>
-                  <Form.Text className="text-muted">
-                    Who requested this ticket
-                  </Form.Text>
-                </Form.Group>
-              </Col>
-
-              <Col md={4}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Assignee</Form.Label>
-                  <Form.Select
-                    name="assignee_id"
-                    value={formData.assignee_id || ""}
-                    onChange={handleChange}
-                  >
-                    <option value="">None</option>
-                    {users.map((user) => (
-                      <option key={user.id} value={user.id}>
-                        {user.firstName} {user.lastName}
+                      <option value="In Technical Design">
+                        In Technical Design
                       </option>
-                    ))}
-                  </Form.Select>
-                  <Form.Text className="text-muted">
-                    Who is working on this ticket
-                  </Form.Text>
-                </Form.Group>
-              </Col>
-            </Row>
+                      <option value="In Development">In Development</option>
+                      <option value="Blocked - User">Blocked - User</option>
+                      <option value="Blocked - Dev">Blocked - Dev</option>
+                      <option value="In Testing - Dev">In Testing - Dev</option>
+                      <option value="In Testing - UAT">In Testing - UAT</option>
+                      <option value="Ready For Release">
+                        Ready For Release
+                      </option>
+                      <option value="Released">Released</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Title*</Form.Label>
-              <Form.Control
-                type="text"
-                name="title"
-                value={formData.title}
-                onChange={handleChange}
-                placeholder="e.g. Email not sending"
-                required
-              />
-            </Form.Group>
+              {/* Row 4: Support Area & Release */}
+              <div className="row mb-4">
+                <div className="col-md-6">
+                  <div className="ticket-modal-field">
+                    <label className="ticket-modal-label">Support Area*</label>
+                    <select
+                      className="ticket-modal-select"
+                      name="supportArea"
+                      value={formData.supportArea}
+                      onChange={handleChange}
+                      required
+                    >
+                      <option value="CRM">CRM</option>
+                      <option value="Customer Support">Customer Support</option>
+                      <option value="Marketing">Marketing</option>
+                    </select>
+                  </div>
+                </div>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Description</Form.Label>
-              <Form.Control
-                as="textarea"
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                rows={3}
-                placeholder="Detailed description of this ticket"
-              />
-            </Form.Group>
+                <div className="col-md-6">
+                  <div className="ticket-modal-field">
+                    <label className="ticket-modal-label">Release</label>
+                    <select
+                      className="ticket-modal-select"
+                      name="release_id"
+                      value={formData.release_id}
+                      onChange={handleChange}
+                    >
+                      <option value="">Select Release</option>
+                      {releases &&
+                        releases.map((release) => (
+                          <option key={release.id} value={release.id}>
+                            {release.name}{" "}
+                            {release.version ? `(${release.version})` : ""}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
 
-            <Row>
-              <Col md={4}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Type*</Form.Label>
-                  <Form.Select
-                    name="type"
-                    value={formData.type}
-                    onChange={handleChange}
-                    required
-                  >
-                    <option value="Enhancement">Enhancement</option>
-                    <option value="Issue">Issue</option>
-                    <option value="New Feature">New Feature</option>
-                    <option value="Request">Request</option>
-                  </Form.Select>
-                </Form.Group>
-              </Col>
+              {/* Solution Notes */}
+              <div className="ticket-modal-field mb-4">
+                <label className="ticket-modal-label">Solution Notes</label>
+                <textarea
+                  name="solutionNotes"
+                  className="ticket-modal-textarea"
+                  value={formData.solutionNotes}
+                  onChange={handleChange}
+                  rows={3}
+                  placeholder="Add any notes related to the solution of this ticket"
+                />
+                <small className="text-muted">
+                  Add any notes related to the solution of this ticket
+                </small>
+              </div>
 
-              <Col md={4}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Priority*</Form.Label>
-                  <Form.Select
-                    name="priority"
-                    value={formData.priority}
-                    onChange={handleChange}
-                    required
-                  >
-                    <option value="Low">Low</option>
-                    <option value="Medium">Medium</option>
-                    <option value="High">High</option>
-                  </Form.Select>
-                </Form.Group>
-              </Col>
+              {/* Test Notes */}
+              <div className="ticket-modal-field mb-4">
+                <label className="ticket-modal-label">Test Notes</label>
+                <textarea
+                  name="testNotes"
+                  className="ticket-modal-textarea"
+                  value={formData.testNotes}
+                  onChange={handleChange}
+                  rows={3}
+                  placeholder="Notes related to testing of this ticket"
+                />
+                <small className="text-muted">
+                  Add any notes related to testing requirements or results
+                </small>
+              </div>
+            </form>
+          </div>
 
-              <Col md={4}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Status*</Form.Label>
-                  <Form.Select
-                    name="status"
-                    value={formData.status}
-                    onChange={handleChange}
-                    required
-                  >
-                    <option value="Backlog">Backlog</option>
-                    <option value="Cancelled">Cancelled</option>
-                    <option value="Requirements Gathering">
-                      Requirements Gathering
-                    </option>
-                    <option value="In Technical Design">
-                      In Technical Design
-                    </option>
-                    <option value="In Development">In Development</option>
-                    <option value="Blocked - User">Blocked - User</option>
-                    <option value="Blocked - Dev">Blocked - Dev</option>
-                    <option value="In Testing - Dev">In Testing - Dev</option>
-                    <option value="In Testing - UAT">In Testing - UAT</option>
-                    <option value="Ready For Release">Ready For Release</option>
-                    <option value="Released">Released</option>
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-            </Row>
-
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Support Area*</Form.Label>
-                  <Form.Select
-                    name="supportArea"
-                    value={formData.supportArea}
-                    onChange={handleChange}
-                    required
-                  >
-                    <option value="CRM">CRM</option>
-                    <option value="Customer Support">Customer Support</option>
-                    <option value="Marketing">Marketing</option>
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Release</Form.Label>
-                  <Form.Select
-                    name="release_id"
-                    value={formData.release_id}
-                    onChange={handleChange}
-                  >
-                    <option value="">None</option>
-                    {releases &&
-                      releases.map((release) => (
-                        <option key={release.id} value={release.id}>
-                          {release.name}{" "}
-                          {release.version ? `(${release.version})` : ""}
-                        </option>
-                      ))}
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-            </Row>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Solution Notes</Form.Label>
-              <Form.Control
-                as="textarea"
-                name="solutionNotes"
-                value={formData.solutionNotes}
-                onChange={handleChange}
-                rows={3}
-                placeholder="Add any notes related to the solution of this ticket"
-              />
-              <Form.Text className="text-muted">
-                Add any notes related to the solution of this ticket
-              </Form.Text>
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Test Notes</Form.Label>
-              <Form.Control
-                as="textarea"
-                name="testNotes"
-                value={formData.testNotes}
-                onChange={handleChange}
-                rows={3}
-                placeholder="Notes related to testing of this ticket"
-              />
-              <Form.Text className="text-muted">
-                Add any notes related to testing requirements or results
-              </Form.Text>
-            </Form.Group>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose} disabled={loading}>
-            Cancel
-          </Button>
-          <Button
-            variant="primary"
-            onClick={handleSubmit}
-            disabled={loading || success}
-          >
-            {loading ? "Updating..." : "Update Ticket"}
-          </Button>
-        </Modal.Footer>
-      </Modal>
+          {/* Footer */}
+          <div className="ticket-modal-footer">
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={handleClose}
+              disabled={loading}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={handleSubmit}
+              disabled={loading || success}
+            >
+              {loading ? "Updating..." : "Update Ticket"}
+            </button>
+          </div>
+        </div>
+      </div>
     </>
   );
 };

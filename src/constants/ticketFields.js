@@ -14,9 +14,6 @@ export const TICKET_STATUSES = [
   "In Testing - UAT",
   "Ready For Release",
   "Released",
-  "In Progress",
-  "In Review",
-  "Done",
 ];
 
 export const TICKET_SUPPORT_AREAS = ["CRM", "Customer Support", "Marketing"];

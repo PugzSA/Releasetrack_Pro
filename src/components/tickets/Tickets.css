@@ -632,6 +632,77 @@
   font-weight: 500;
 }
 
+/* Input and form field styles for EditTicketModal */
+.ticket-modal-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.ticket-modal-input:focus {
+  border-color: #667eea;
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.ticket-modal-input:disabled {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  opacity: 1;
+}
+
+.ticket-modal-select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  background-color: white;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.ticket-modal-select:focus {
+  border-color: #667eea;
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.ticket-modal-select-with-icon {
+  width: 100%;
+  padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  background-color: white;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.ticket-modal-select-with-icon:focus {
+  border-color: #667eea;
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.ticket-modal-textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-family: inherit;
+  resize: vertical;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.ticket-modal-textarea:focus {
+  border-color: #667eea;
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
 .ticket-modal-description {
   background-color: #f8f9fa;
   border: 1px solid #e9ecef;

@@ -1,0 +1,228 @@
+.report-charts-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.chart-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.chart-container:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.chart-container.full-width {
+  grid-column: 1 / -1;
+}
+
+.chart-title {
+  margin: 0 0 16px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #495057;
+  text-align: center;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #f8f9fa;
+}
+
+.chart-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+/* Custom styling for NIVO charts */
+.chart-wrapper .nivo-tooltip {
+  background: white !important;
+  border: 1px solid #e9ecef !important;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  font-size: 12px !important;
+  color: #495057 !important;
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+  .charts-row {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .chart-container {
+    padding: 16px;
+  }
+  
+  .chart-title {
+    font-size: 1rem;
+    margin-bottom: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .report-charts-container {
+    gap: 16px;
+  }
+  
+  .chart-container {
+    padding: 12px;
+    border-radius: 8px;
+  }
+  
+  .chart-title {
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+  }
+  
+  .chart-wrapper {
+    height: 250px !important;
+  }
+}
+
+/* Loading state */
+.chart-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.chart-loading::before {
+  content: '';
+  width: 20px;
+  height: 20px;
+  border: 2px solid #e9ecef;
+  border-top: 2px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Empty state */
+.chart-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.chart-empty-icon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+/* Chart animations */
+.chart-container {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Custom legend styling */
+.chart-wrapper .nivo-legends text {
+  font-size: 11px !important;
+  fill: #495057 !important;
+}
+
+/* Custom axis styling */
+.chart-wrapper .nivo-axes text {
+  font-size: 11px !important;
+  fill: #6c757d !important;
+}
+
+.chart-wrapper .nivo-axes .domain {
+  stroke: #e9ecef !important;
+}
+
+.chart-wrapper .nivo-axes .tick line {
+  stroke: #e9ecef !important;
+}
+
+/* Grid lines */
+.chart-wrapper .nivo-grid line {
+  stroke: #f8f9fa !important;
+  stroke-width: 1px !important;
+}
+
+/* Pie chart specific styling */
+.chart-wrapper .nivo-pie .slice {
+  cursor: pointer;
+}
+
+.chart-wrapper .nivo-pie .slice:hover {
+  filter: brightness(1.1);
+}
+
+/* Bar chart specific styling */
+.chart-wrapper .nivo-bar .bar {
+  cursor: pointer;
+}
+
+.chart-wrapper .nivo-bar .bar:hover {
+  filter: brightness(1.1);
+}
+
+/* Line chart specific styling */
+.chart-wrapper .nivo-line .line {
+  stroke-width: 3px !important;
+}
+
+.chart-wrapper .nivo-line .point {
+  cursor: pointer;
+}
+
+.chart-wrapper .nivo-line .point:hover {
+  r: 6 !important;
+}
+
+/* Accessibility improvements */
+.chart-container:focus-within {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+  .chart-container {
+    box-shadow: none;
+    border: 1px solid #dee2e6;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  
+  .charts-row {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

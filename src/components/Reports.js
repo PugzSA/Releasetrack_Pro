@@ -1,345 +1,360 @@
-import React, { useState } from 'react';
-import { Form, Button, Card, Table } from 'react-bootstrap';
-import './Reports.css';
+import React, { useState, useEffect } from "react";
+import { Download, BarChart3 } from "lucide-react";
+import { useApp } from "../context/AppContext";
+import ReportFilters from "./reports/ReportFilters";
+import ReportCharts from "./reports/ReportCharts";
+import ReportTable from "./reports/ReportTable";
+import TicketModal from "./tickets/TicketModal";
+import NotificationToast from "./common/NotificationToast";
+import ReportDataService from "../services/ReportDataService";
+import "./Reports.css";
 
 const Reports = () => {
-  const [reportType, setReportType] = useState('release');
-  
+  const { supabase } = useApp();
+  const [reportDataService] = useState(() => new ReportDataService(supabase));
+
+  // State management
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [tickets, setTickets] = useState([]);
+  const [chartData, setChartData] = useState(null);
+  const [users, setUsers] = useState([]);
+  const [releases, setReleases] = useState([]);
+  const [selectedTicket, setSelectedTicket] = useState(null);
+
+  // Global toast state
+  const [notification, setNotification] = useState({
+    show: false,
+    message: "",
+    variant: "success",
+  });
+
+  // Function to show toast notifications
+  const showToast = (message, variant = "success") => {
+    setNotification({
+      show: true,
+      message,
+      variant,
+    });
+  };
+  const [currentFilters, setCurrentFilters] = useState({
+    reportType: "ticket_analysis",
+    timePeriod: "all_time",
+    status: [],
+    type: [],
+    priority: [],
+    release_id: [],
+    assignee_id: "",
+    requester_id: "",
+  });
+
+  // Load initial data (users and releases only, no tickets)
+  useEffect(() => {
+    loadInitialData();
+  }, []);
+
+  const getDateRangeFromPeriod = (period) => {
+    const now = new Date();
+    let dateTo = now.toISOString().split("T")[0];
+    let dateFrom;
+
+    switch (period) {
+      case "all_time":
+        dateFrom = "";
+        dateTo = "";
+        break;
+      case "last_7_days":
+        const date7 = new Date(now);
+        date7.setDate(date7.getDate() - 7);
+        dateFrom = date7.toISOString().split("T")[0];
+        break;
+      case "last_30_days":
+        const date30 = new Date(now);
+        date30.setDate(date30.getDate() - 30);
+        dateFrom = date30.toISOString().split("T")[0];
+        break;
+      case "last_90_days":
+        const date90 = new Date(now);
+        date90.setDate(date90.getDate() - 90);
+        dateFrom = date90.toISOString().split("T")[0];
+        break;
+      case "last_6_months":
+        const date6m = new Date(now);
+        date6m.setMonth(date6m.getMonth() - 6);
+        dateFrom = date6m.toISOString().split("T")[0];
+        break;
+      case "last_year":
+        const date1y = new Date(now);
+        date1y.setFullYear(date1y.getFullYear() - 1);
+        dateFrom = date1y.toISOString().split("T")[0];
+        break;
+      default:
+        dateFrom = "";
+    }
+
+    return { dateFrom, dateTo };
+  };
+
+  const loadInitialData = async () => {
+    try {
+      setLoading(true);
+
+      // Load users and releases for filters only (no tickets)
+      const [usersData, releasesData] = await Promise.all([
+        supabase
+          .from("users")
+          .select("*")
+          .order("lastName", { ascending: true }),
+        supabase
+          .from("releases")
+          .select("*")
+          .order("name", { ascending: true }),
+      ]);
+
+      if (usersData.error) throw usersData.error;
+      if (releasesData.error) throw releasesData.error;
+
+      setUsers(usersData.data || []);
+      setReleases(releasesData.data || []);
+
+      // Don't load any ticket data initially - wait for user to click Generate Report
+    } catch (err) {
+      console.error("Error loading initial data:", err);
+      setError("Failed to load initial filter data. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleApplyFilters = async (filters) => {
+    try {
+      setLoading(true);
+      setError(null);
+      setCurrentFilters(filters);
+
+      // Clear existing data to ensure fresh start
+      setTickets([]);
+      setChartData(null);
+
+      // Fetch fresh ticket data with filters (always from database)
+      const ticketData = await reportDataService.getTicketReportData(filters);
+      setTickets(ticketData);
+
+      // Generate chart data from fresh data
+      const charts = reportDataService.getChartData(ticketData);
+      setChartData(charts);
+
+      // Show success toast
+      showToast("Report generated successfully", "success");
+    } catch (err) {
+      console.error("Error applying filters:", err);
+      setError("Failed to generate report. Please try again.");
+      // Clear data on error
+      setTickets([]);
+      setChartData(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleClearFilters = () => {
+    const defaultFilters = {
+      reportType: "ticket_analysis",
+      timePeriod: "all_time",
+      status: [],
+      type: [],
+      priority: [],
+      release_id: [],
+      assignee_id: "",
+      requester_id: "",
+    };
+
+    // Clear current data and reset to initial state
+    setTickets([]);
+    setChartData(null);
+    setCurrentFilters(defaultFilters);
+    setError(null);
+  };
+
+  const handleExportCSV = (ticketsToExport = tickets) => {
+    try {
+      const csvContent = reportDataService.exportToCSV(ticketsToExport);
+      const timestamp = new Date().toISOString().split("T")[0];
+      const filename = `ticket-report-${timestamp}.csv`;
+      reportDataService.downloadCSV(csvContent, filename);
+
+      // Show success toast
+      showToast("CSV report exported successfully", "success");
+    } catch (err) {
+      console.error("Error exporting CSV:", err);
+      setError("Failed to export CSV. Please try again.");
+    }
+  };
+
+  const handleTicketClick = (ticket) => {
+    setSelectedTicket(ticket);
+  };
+
+  const handleUpdateTicket = async (ticketId, updateData) => {
+    try {
+      const updatedTicket = await reportDataService.updateTicket(
+        ticketId,
+        updateData
+      );
+
+      // Update the ticket in the current tickets list
+      setTickets((prevTickets) =>
+        prevTickets.map((ticket) =>
+          ticket.id === ticketId ? { ...ticket, ...updatedTicket } : ticket
+        )
+      );
+
+      // Regenerate chart data with updated tickets
+      const updatedTickets = tickets.map((ticket) =>
+        ticket.id === ticketId ? { ...ticket, ...updatedTicket } : ticket
+      );
+      const charts = reportDataService.getChartData(updatedTickets);
+      setChartData(charts);
+
+      return updatedTicket;
+    } catch (error) {
+      console.error("Error updating ticket:", error);
+      throw error;
+    }
+  };
+
+  const handleRefreshData = async () => {
+    // Refresh the reports data with current filters
+    if (currentFilters) {
+      await handleApplyFilters(currentFilters);
+    }
+  };
+
   return (
     <div className="reports-container">
       <div className="page-header">
-        <div>
-          <h1>Reports</h1>
-          <p className="page-subtitle">Generate insights and analytics for stakeholders</p>
-        </div>
-        <Button variant="primary">
-          <i className="bi bi-download"></i> Export Report
-        </Button>
-      </div>
-
-      <div className="report-filters card">
-        <div className="card-body">
-          <h5>Report Filters</h5>
-          <div className="filter-row">
-            <Form.Group className="mb-3">
-              <Form.Label>Report Type</Form.Label>
-              <Form.Select 
-                value={reportType} 
-                onChange={(e) => setReportType(e.target.value)}
-              >
-                <option value="release">Release Summary</option>
-                <option value="ticket">Ticket Analysis</option>
-                <option value="metadata">Metadata Changes</option>
-                <option value="timeline">Deployment Timeline</option>
-              </Form.Select>
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Time Period</Form.Label>
-              <Form.Select>
-                <option>Last 30 days</option>
-                <option>Last 90 days</option>
-                <option>Last 6 months</option>
-                <option>Last year</option>
-                <option>Custom range</option>
-              </Form.Select>
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Release</Form.Label>
-              <Form.Select>
-                <option>All Releases</option>
-                <option>February 2024 Release</option>
-                <option>January 2024 Release</option>
-              </Form.Select>
-            </Form.Group>
-          </div>
-
-          <div className="d-flex justify-content-end">
-            <Button variant="primary">
-              Generate Report
-            </Button>
+        <div className="header-content">
+          <div className="header-text">
+            <h1>
+              <BarChart3 size={28} className="me-2" />
+              Reports & Analytics
+            </h1>
           </div>
         </div>
       </div>
 
-      {reportType === 'release' && (
-        <div className="report-content">
-          <Card className="mb-4">
-            <Card.Header>
-              <h5>Release Summary</h5>
-            </Card.Header>
-            <Card.Body>
-              <div className="report-stats">
-                <div className="stat-item">
-                  <h3>2</h3>
-                  <p>Total Releases</p>
-                </div>
-                <div className="stat-item">
-                  <h3>1</h3>
-                  <p>Completed</p>
-                </div>
-                <div className="stat-item">
-                  <h3>1</h3>
-                  <p>In Progress</p>
-                </div>
-                <div className="stat-item">
-                  <h3>0</h3>
-                  <p>Delayed</p>
-                </div>
-              </div>
+      {/* Report Filters */}
+      <ReportFilters
+        onApplyFilters={handleApplyFilters}
+        onClearFilters={handleClearFilters}
+        users={users}
+        releases={releases}
+        initialFilters={currentFilters}
+      />
 
-              <div className="chart-container">
-                <div className="chart-placeholder">
-                  <p>Release Status Distribution Chart</p>
-                </div>
-              </div>
-            </Card.Body>
-          </Card>
-
-          <Card>
-            <Card.Header>
-              <h5>Release Details</h5>
-            </Card.Header>
-            <Card.Body>
-              <Table responsive>
-                <thead>
-                  <tr>
-                    <th>Release Name</th>
-                    <th>Target Date</th>
-                    <th>Status</th>
-                    <th>Tickets</th>
-                    <th>Metadata Items</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>February 2024 Release</td>
-                    <td>Feb 28, 2024</td>
-                    <td><span className="status-badge testing">testing</span></td>
-                    <td>1</td>
-                    <td>2</td>
-                  </tr>
-                  <tr>
-                    <td>January 2024 Release</td>
-                    <td>Jan 31, 2024</td>
-                    <td><span className="status-badge development">development</span></td>
-                    <td>0</td>
-                    <td>0</td>
-                  </tr>
-                </tbody>
-              </Table>
-            </Card.Body>
-          </Card>
+      {/* Error Display */}
+      {error && (
+        <div className="alert alert-danger" role="alert">
+          {error}
         </div>
       )}
 
-      {reportType === 'ticket' && (
-        <div className="report-content">
-          <Card className="mb-4">
-            <Card.Header>
-              <h5>Ticket Analysis</h5>
-            </Card.Header>
-            <Card.Body>
-              <div className="report-stats">
-                <div className="stat-item">
-                  <h3>1</h3>
-                  <p>Total Tickets</p>
-                </div>
-                <div className="stat-item">
-                  <h3>1</h3>
-                  <p>Bugs</p>
-                </div>
-                <div className="stat-item">
-                  <h3>0</h3>
-                  <p>Enhancements</p>
-                </div>
-                <div className="stat-item">
-                  <h3>0</h3>
-                  <p>Features</p>
-                </div>
-              </div>
-
-              <div className="chart-container">
-                <div className="chart-placeholder">
-                  <p>Ticket Type Distribution Chart</p>
-                </div>
-              </div>
-            </Card.Body>
-          </Card>
-
-          <Card>
-            <Card.Header>
-              <h5>Ticket Details</h5>
-            </Card.Header>
-            <Card.Body>
-              <Table responsive>
-                <thead>
-                  <tr>
-                    <th>Ticket ID</th>
-                    <th>Title</th>
-                    <th>Type</th>
-                    <th>Priority</th>
-                    <th>Status</th>
-                    <th>Release</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>SUP-00001</td>
-                    <td>Email not sending</td>
-                    <td><span className="status-badge bug">bug</span></td>
-                    <td><span className="status-badge high">high</span></td>
-                    <td><span className="status-badge open">open</span></td>
-                    <td>February 2024 Release</td>
-                  </tr>
-                </tbody>
-              </Table>
-            </Card.Body>
-          </Card>
+      {/* Loading State */}
+      {loading && (
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Generating report...</p>
         </div>
       )}
 
-      {reportType === 'metadata' && (
-        <div className="report-content">
-          <Card className="mb-4">
-            <Card.Header>
-              <h5>Metadata Changes</h5>
-            </Card.Header>
-            <Card.Body>
-              <div className="report-stats">
-                <div className="stat-item">
-                  <h3>3</h3>
-                  <p>Total Changes</p>
-                </div>
-                <div className="stat-item">
-                  <h3>1</h3>
-                  <p>Created</p>
-                </div>
-                <div className="stat-item">
-                  <h3>1</h3>
-                  <p>Updated</p>
-                </div>
-                <div className="stat-item">
-                  <h3>1</h3>
-                  <p>Deleted</p>
-                </div>
-              </div>
+      {/* Report Content */}
+      {!loading && chartData && (
+        <>
+          {/* Summary Statistics */}
+          <div className="report-summary">
+            <div className="summary-card">
+              <h3>{tickets.length}</h3>
+              <p>Total Tickets</p>
+            </div>
+            <div className="summary-card">
+              <h3>{tickets.filter((t) => t.has_release).length}</h3>
+              <p>With Release</p>
+            </div>
+            <div className="summary-card">
+              <h3>{tickets.filter((t) => t.priority === "High").length}</h3>
+              <p>High Priority</p>
+            </div>
+            <div className="summary-card">
+              <h3>
+                {
+                  tickets.filter((t) =>
+                    ["Released", "Closed"].includes(t.status)
+                  ).length
+                }
+              </h3>
+              <p>Resolved</p>
+            </div>
+          </div>
 
-              <div className="chart-container">
-                <div className="chart-placeholder">
-                  <p>Metadata Changes by Type Chart</p>
-                </div>
-              </div>
-            </Card.Body>
-          </Card>
+          {/* Charts */}
+          <ReportCharts
+            chartData={chartData}
+            reportType={currentFilters.reportType}
+          />
 
-          <Card>
-            <Card.Header>
-              <h5>Metadata Details</h5>
-            </Card.Header>
-            <Card.Body>
-              <Table responsive>
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Type</th>
-                    <th>Action</th>
-                    <th>Object</th>
-                    <th>Date</th>
-                    <th>Release</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>Customer_Portal_Access_c</td>
-                    <td>apex class</td>
-                    <td><span className="status-badge create">create</span></td>
-                    <td>Case</td>
-                    <td>Jul 3, 2023</td>
-                    <td>-</td>
-                  </tr>
-                  <tr>
-                    <td>Customer_Portal_Access_c</td>
-                    <td>custom field</td>
-                    <td><span className="status-badge delete">delete</span></td>
-                    <td>Account</td>
-                    <td>Jul 7, 2023</td>
-                    <td>February 2024 Release</td>
-                  </tr>
-                  <tr>
-                    <td>OrderValidationRule</td>
-                    <td>validation rule</td>
-                    <td><span className="status-badge update">update</span></td>
-                    <td>Order</td>
-                    <td>Jul 7, 2023</td>
-                    <td>February 2024 Release</td>
-                  </tr>
-                </tbody>
-              </Table>
-            </Card.Body>
-          </Card>
+          {/* Data Table */}
+          <ReportTable
+            tickets={tickets}
+            onExportCSV={handleExportCSV}
+            onTicketClick={handleTicketClick}
+          />
+        </>
+      )}
+
+      {/* Initial State - No data loaded yet */}
+      {!loading && !error && !chartData && (
+        <div className="empty-state">
+          <BarChart3 size={64} className="empty-icon" />
+          <h3>Ready to Generate Report</h3>
+          <p>
+            Click "Generate Report" to fetch the latest data and create your
+            analytics report.
+          </p>
         </div>
       )}
 
-      {reportType === 'timeline' && (
-        <div className="report-content">
-          <Card>
-            <Card.Header>
-              <h5>Deployment Timeline</h5>
-            </Card.Header>
-            <Card.Body>
-              <div className="timeline-container">
-                <div className="timeline-placeholder">
-                  <p>Deployment Timeline Chart</p>
-                </div>
-                <div className="timeline-legend">
-                  <div className="legend-item">
-                    <span className="legend-color" style={{ backgroundColor: '#1976d2' }}></span>
-                    <span>Development</span>
-                  </div>
-                  <div className="legend-item">
-                    <span className="legend-color" style={{ backgroundColor: '#fbc02d' }}></span>
-                    <span>Testing</span>
-                  </div>
-                  <div className="legend-item">
-                    <span className="legend-color" style={{ backgroundColor: '#43a047' }}></span>
-                    <span>Production</span>
-                  </div>
-                </div>
-              </div>
-
-              <Table responsive className="mt-4">
-                <thead>
-                  <tr>
-                    <th>Release</th>
-                    <th>Development Start</th>
-                    <th>Testing Start</th>
-                    <th>Production Deploy</th>
-                    <th>Duration (days)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>February 2024 Release</td>
-                    <td>Jan 15, 2024</td>
-                    <td>Feb 10, 2024</td>
-                    <td>Feb 28, 2024</td>
-                    <td>44</td>
-                  </tr>
-                  <tr>
-                    <td>January 2024 Release</td>
-                    <td>Dec 15, 2023</td>
-                    <td>Jan 20, 2024</td>
-                    <td>Jan 31, 2024</td>
-                    <td>47</td>
-                  </tr>
-                </tbody>
-              </Table>
-            </Card.Body>
-          </Card>
+      {/* Empty Results State - Data was loaded but no results */}
+      {!loading && !error && chartData && tickets.length === 0 && (
+        <div className="empty-state">
+          <BarChart3 size={64} className="empty-icon" />
+          <h3>No Data Available</h3>
+          <p>
+            No tickets match your current filter criteria. Try adjusting your
+            filters or check back later.
+          </p>
         </div>
       )}
+
+      {/* Ticket Modal */}
+      {selectedTicket && (
+        <TicketModal
+          ticket={selectedTicket}
+          onClose={() => setSelectedTicket(null)}
+          users={users}
+          releases={releases}
+          onUpdateTicket={handleUpdateTicket}
+          onRefreshData={handleRefreshData}
+          showToast={showToast}
+        />
+      )}
+
+      {/* Global Toast Notification */}
+      <NotificationToast
+        show={notification.show}
+        message={notification.message}
+        variant={notification.variant}
+        onClose={() => setNotification({ ...notification, show: false })}
+      />
     </div>
   );
 };
