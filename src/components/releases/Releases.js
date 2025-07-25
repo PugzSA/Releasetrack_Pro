@@ -4,7 +4,6 @@ import NewReleaseModal from "./NewReleaseModal";
 import ReleaseFilterModal from "./ReleaseFilterModal";
 import ReleaseSearchModal from "./ReleaseSearchModal";
 import TicketModal from "../tickets/TicketModal";
-import UserAvatar from "../common/UserAvatar";
 import NotificationToast from "../common/NotificationToast";
 import { useApp } from "../../context/AppContext";
 import { getStatusClass } from "../../utils/statusUtils";
@@ -806,7 +805,7 @@ const Releases = () => {
               <Search size={20} />
             </button>
             <button
-              className="btn btn-icon me-3 position-relative"
+              className="btn btn-icon position-relative"
               onClick={() => setShowFilterModal(true)}
               title="Filter releases"
             >
@@ -818,9 +817,6 @@ const Releases = () => {
                 </span>
               )}
             </button>
-
-            {/* User Avatar */}
-            <UserAvatar size={32} />
           </div>
         </div>
       </div>

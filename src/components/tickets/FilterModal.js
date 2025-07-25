@@ -323,8 +323,18 @@ const FilterModal = ({
           <div className="filter-grid">
             {/* Requester Filter */}
             <div className="filter-group">
-              <label className="filter-label">
-                <User size={16} className="me-2" />
+              <label
+                className="filter-label"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "flex-start",
+                  gap: "8px",
+                  width: "100%",
+                  textAlign: "left",
+                }}
+              >
+                <User size={16} />
                 Requester
               </label>
               <div className="filter-dropdown-container">
@@ -333,6 +343,7 @@ const FilterModal = ({
                   <input
                     type="text"
                     placeholder="Search requesters..."
+                    style={{ paddingLeft: "48px" }}
                     value={
                       localFilters.requester_id
                         ? getSelectedUserName(localFilters.requester_id)
@@ -391,8 +402,18 @@ const FilterModal = ({
 
             {/* Assignee Filter */}
             <div className="filter-group">
-              <label className="filter-label">
-                <User size={16} className="me-2" />
+              <label
+                className="filter-label"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "flex-start",
+                  gap: "8px",
+                  width: "100%",
+                  textAlign: "left",
+                }}
+              >
+                <User size={16} />
                 Assignee
               </label>
               <div className="filter-dropdown-container">
@@ -401,6 +422,7 @@ const FilterModal = ({
                   <input
                     type="text"
                     placeholder="Search assignees..."
+                    style={{ paddingLeft: "48px" }}
                     value={
                       localFilters.assignee_id
                         ? getSelectedUserName(localFilters.assignee_id)
@@ -459,8 +481,18 @@ const FilterModal = ({
 
             {/* Support Area Filter */}
             <div className="filter-group">
-              <label className="filter-label">
-                <Tag size={16} className="me-2" />
+              <label
+                className="filter-label"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "flex-start",
+                  gap: "8px",
+                  width: "100%",
+                  textAlign: "left",
+                }}
+              >
+                <Tag size={16} />
                 Support Area
               </label>
               <select
@@ -481,8 +513,18 @@ const FilterModal = ({
 
             {/* Type Filter */}
             <div className="filter-group">
-              <label className="filter-label">
-                <AlertCircle size={16} className="me-2" />
+              <label
+                className="filter-label"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "flex-start",
+                  gap: "8px",
+                  width: "100%",
+                  textAlign: "left",
+                }}
+              >
+                <AlertCircle size={16} />
                 Type
               </label>
               <select
@@ -501,8 +543,18 @@ const FilterModal = ({
 
             {/* Priority Filter */}
             <div className="filter-group">
-              <label className="filter-label">
-                <AlertCircle size={16} className="me-2" />
+              <label
+                className="filter-label"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "flex-start",
+                  gap: "8px",
+                  width: "100%",
+                  textAlign: "left",
+                }}
+              >
+                <AlertCircle size={16} />
                 Priority
               </label>
               <select
@@ -521,8 +573,18 @@ const FilterModal = ({
 
             {/* Status Filter - Multi-Select */}
             <div className="filter-group">
-              <label className="filter-label">
-                <CheckCircle size={16} className="me-2" />
+              <label
+                className="filter-label"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "flex-start",
+                  gap: "8px",
+                  width: "100%",
+                  textAlign: "left",
+                }}
+              >
+                <CheckCircle size={16} />
                 Status ({localFilters.status.length} selected)
               </label>
               <div className="filter-multi-select">
@@ -573,8 +635,18 @@ const FilterModal = ({
 
             {/* Release Filter */}
             <div className="filter-group">
-              <label className="filter-label">
-                <Calendar size={16} className="me-2" />
+              <label
+                className="filter-label"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "flex-start",
+                  gap: "8px",
+                  width: "100%",
+                  textAlign: "left",
+                }}
+              >
+                <Calendar size={16} />
                 Release
               </label>
               <select

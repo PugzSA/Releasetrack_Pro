@@ -3,7 +3,6 @@ import TicketModal from "./TicketModal";
 import NewTicketModal from "./NewTicketModal";
 import SearchModal from "./SearchModal";
 import FilterModal from "./FilterModal";
-import UserAvatar from "../common/UserAvatar";
 import NotificationToast from "../common/NotificationToast";
 import { useApp } from "../../context/AppContext";
 import { getStatusClass } from "../../utils/statusUtils";
@@ -458,7 +457,7 @@ const Tickets = () => {
               <Search size={20} />
             </button>
             <button
-              className="btn btn-icon me-3 position-relative"
+              className="btn btn-icon position-relative"
               onClick={() => setShowFilterModal(true)}
               title="Filter tickets"
             >
@@ -470,9 +469,6 @@ const Tickets = () => {
                 </span>
               )}
             </button>
-
-            {/* User Avatar */}
-            <UserAvatar size={32} />
           </div>
         </div>
       </div>

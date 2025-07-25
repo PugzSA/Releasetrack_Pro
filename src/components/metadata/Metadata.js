@@ -8,7 +8,6 @@ import MetadataSearchModal from "./MetadataSearchModal";
 import MetadataFilterModal from "./MetadataFilterModal";
 import MetadataEditModal from "./MetadataEditModal";
 import NewMetadataModal from "./NewMetadataModal";
-import UserAvatar from "../common/UserAvatar";
 import NotificationToast from "../common/NotificationToast";
 import {
   Search,
@@ -363,7 +362,7 @@ const Metadata = () => {
               <Search size={20} />
             </button>
             <button
-              className="btn btn-icon me-3 position-relative"
+              className="btn btn-icon position-relative"
               onClick={() => setShowFilterModal(true)}
               title="Filter metadata"
             >
@@ -375,9 +374,6 @@ const Metadata = () => {
                 </span>
               )}
             </button>
-
-            {/* User Avatar */}
-            <UserAvatar size={32} />
           </div>
         </div>
       </div>

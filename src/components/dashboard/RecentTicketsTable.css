@@ -1,0 +1,264 @@
+/* Recent Tickets Table - Using Bootstrap card structure */
+
+/* Ticket count styling to match the design */
+.ticket-count {
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.report-table th {
+  background: #f8f9fa;
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #495057;
+  border-bottom: 2px solid #e9ecef;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.report-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease;
+  position: relative;
+  padding-right: 32px;
+}
+
+.report-table th.sortable:hover {
+  background-color: #e9ecef;
+}
+
+.sort-icon {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: color 0.2s ease;
+}
+
+.sort-icon.inactive {
+  color: #ced4da;
+}
+
+.sort-icon.active {
+  color: #007bff;
+}
+
+.report-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f1f3f4;
+  vertical-align: middle;
+}
+
+.table-row:hover {
+  background-color: #f8f9fa;
+}
+
+.ticket-id {
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+  font-weight: 600;
+  color: #007bff;
+  position: relative;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.ticket-id:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+.id-text {
+  margin-right: 6px;
+}
+
+.external-icon {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  color: #6c757d;
+}
+
+.ticket-id:hover .external-icon {
+  opacity: 1;
+}
+
+.ticket-title {
+  max-width: 200px;
+}
+
+.ticket-title span {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: help;
+}
+
+.user-name {
+  font-weight: 500;
+  color: #495057;
+}
+
+.release-name {
+  font-weight: 500;
+  color: #6f42c1;
+}
+
+.date-cell {
+  color: #6c757d;
+  font-size: 0.85rem;
+}
+
+.no-data {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6c757d;
+  font-style: italic;
+}
+
+/* Badge styles */
+.badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Priority badges - Improved contrast */
+.badge-high {
+  background-color: #dc3545;
+  color: #ffffff;
+}
+
+.badge-medium {
+  background-color: #fd7e14;
+  color: #ffffff;
+}
+
+.badge-low {
+  background-color: #20c997;
+  color: #ffffff;
+}
+
+/* Type badges */
+.badge-enhancement {
+  background-color: #007bff;
+  color: #ffffff;
+}
+
+.badge-issue {
+  background-color: #dc3545;
+  color: #ffffff;
+}
+
+.badge-new-feature {
+  background-color: #28a745;
+  color: #ffffff;
+}
+
+.badge-request {
+  background-color: #6f42c1;
+  color: #ffffff;
+}
+
+/* Status badges - Improved contrast */
+.badge-backlog {
+  background-color: #6c757d;
+  color: #ffffff;
+}
+
+.badge-in-technical-design {
+  background-color: #007bff;
+  color: #ffffff;
+}
+
+.badge-in-development {
+  background-color: #fd7e14;
+  color: #ffffff;
+}
+
+.badge-requirements-gathering {
+  background-color: #ffc107;
+  color: #212529;
+}
+
+.badge-released {
+  background-color: #28a745;
+  color: #ffffff;
+}
+
+.badge-closed {
+  background-color: #6c757d;
+  color: #ffffff;
+}
+
+.badge-default {
+  background-color: #e9ecef;
+  color: #495057;
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+  .table-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+}
+
+@media (max-width: 768px) {
+  .recent-tickets-container {
+    margin: 16px 0;
+    border-radius: 8px;
+  }
+
+  .table-header {
+    padding: 16px;
+  }
+
+  .report-table {
+    font-size: 0.8rem;
+  }
+
+  .report-table th,
+  .report-table td {
+    padding: 8px 12px;
+  }
+
+  .ticket-title {
+    max-width: 150px;
+  }
+}
+
+/* Print styles */
+@media print {
+  .recent-tickets-container {
+    box-shadow: none;
+    border: 1px solid #dee2e6;
+  }
+
+  .report-table {
+    font-size: 0.8rem;
+  }
+
+  .table-row:hover {
+    background-color: transparent;
+  }
+}

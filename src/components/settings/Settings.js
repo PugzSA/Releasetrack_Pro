@@ -12,6 +12,7 @@ import {
 import { useApp } from "../../context/AppContext";
 import SystemSettings from "./SystemSettings";
 import NotificationLogs from "./NotificationLogs";
+import JumbotronSettings from "./JumbotronSettings";
 import "./Settings.css";
 
 const Settings = () => {
@@ -212,6 +213,12 @@ const Settings = () => {
             </Nav.Link>
           </Nav.Item>
           <Nav.Item>
+            <Nav.Link eventKey="jumbotron">
+              <i className="bi bi-megaphone me-2"></i>
+              Jumbotron Messages
+            </Nav.Link>
+          </Nav.Item>
+          <Nav.Item>
             <Nav.Link eventKey="logs">
               <i className="bi bi-journal-text me-2"></i>
               Notification Logs
@@ -297,6 +304,10 @@ const Settings = () => {
 
           <Tab.Pane eventKey="notifications">
             <SystemSettings />
+          </Tab.Pane>
+
+          <Tab.Pane eventKey="jumbotron">
+            <JumbotronSettings />
           </Tab.Pane>
 
           <Tab.Pane eventKey="logs">

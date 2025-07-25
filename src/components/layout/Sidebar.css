@@ -56,8 +56,6 @@
   text-transform: uppercase;
 }
 
-
-
 .sidebar .nav-item {
   display: flex;
   align-items: center;
@@ -85,4 +83,12 @@
   flex-shrink: 0; /* Prevent the footer from shrinking */
   padding-top: 10px;
   border-top: 1px solid var(--border-color);
+}
+
+.sidebar-user-avatar {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 12px 20px;
+  margin-bottom: 8px;
 }

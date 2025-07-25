@@ -1,4 +1,4 @@
-/* Filter Modal Styles */
+/* Filter Modal Styles - Updated 2025-01-25 */
 .filter-modal-overlay {
   position: fixed;
   top: 0;
@@ -83,26 +83,48 @@
 
 .filter-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: 1fr 1fr;
   gap: 24px;
+  max-width: 100%;
 }
 
 .filter-group {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  align-items: flex-start;
+  width: 100%;
+  min-width: 280px;
 }
 
-.filter-label {
-  display: flex;
-  align-items: center;
+.filter-modal-container .filter-group .filter-label {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
   font-weight: 500;
   color: #374151;
   font-size: 14px;
   margin-bottom: 4px;
+  gap: 8px !important;
+  text-align: left !important;
+  width: 100% !important;
+}
+
+.filter-modal-container .filter-group .filter-label svg {
+  margin-right: 0 !important;
+  margin-end: 0 !important;
+  margin-inline-end: 0 !important;
+}
+
+/* Override Bootstrap me-* classes specifically */
+.filter-modal-container .filter-group .filter-label .me-2 {
+  margin-right: 0 !important;
+  margin-end: 0 !important;
+  margin-inline-end: 0 !important;
 }
 
 .filter-select {
+  width: 100%;
   padding: 12px 16px;
   border: 2px solid #e5e7eb;
   border-radius: 12px;
@@ -124,17 +146,20 @@
 /* Dropdown Container */
 .filter-dropdown-container {
   position: relative;
+  width: 100%;
 }
 
 .filter-search-input {
   position: relative;
   display: flex;
   align-items: center;
+  width: 100%;
 }
 
-.filter-input {
+.filter-modal-container .filter-search-input .filter-input {
   width: 100%;
-  padding: 12px 16px 12px 44px;
+  padding: 12px 16px 12px 48px !important;
+  padding-left: 48px !important;
   border: 2px solid #e5e7eb;
   border-radius: 12px;
   font-size: 14px;
@@ -143,20 +168,27 @@
   outline: none;
 }
 
-.filter-input:focus {
+.filter-modal-container .filter-search-input .filter-input:focus {
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.filter-input:hover {
+.filter-modal-container .filter-search-input .filter-input:hover {
   border-color: #d1d5db;
 }
 
-.search-icon {
+.filter-modal-container .filter-search-input .search-icon {
   position: absolute;
   left: 16px;
   color: #9ca3af;
   z-index: 1;
+  pointer-events: none;
+}
+
+/* Ensure placeholder text doesn't overlap with icon */
+.filter-modal-container .filter-search-input .filter-input::placeholder {
+  padding-left: 4px;
+  text-indent: 4px;
 }
 
 .clear-filter-btn {
@@ -385,6 +417,7 @@
 
 /* Multi-Select Component */
 .filter-multi-select {
+  width: 100%;
   border: 2px solid #e5e7eb;
   border-radius: 12px;
   background: white;

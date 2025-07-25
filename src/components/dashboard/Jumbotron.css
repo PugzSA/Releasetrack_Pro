@@ -1,0 +1,115 @@
+.jumbotron-container {
+  width: 100%;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.jumbotron-message {
+  position: relative;
+  padding: 15px 20px;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.jumbotron-content {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.scrolling-text {
+  display: inline-block;
+  white-space: nowrap;
+  font-size: 16px;
+  font-weight: 500;
+  animation: scroll-left 15s linear infinite;
+  padding-left: 100%;
+}
+
+@keyframes scroll-left {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+/* Pause animation on hover */
+.jumbotron-message:hover .scrolling-text {
+  animation-play-state: paused;
+}
+
+/* Message indicators */
+.message-indicators {
+  position: absolute;
+  bottom: 5px;
+  right: 15px;
+  display: flex;
+  gap: 6px;
+  z-index: 10;
+}
+
+.indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  opacity: 0.6;
+}
+
+.indicator.active {
+  opacity: 1;
+  transform: scale(1.2);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .jumbotron-message {
+    padding: 12px 15px;
+    min-height: 50px;
+  }
+  
+  .scrolling-text {
+    font-size: 14px;
+  }
+  
+  .message-indicators {
+    bottom: 3px;
+    right: 10px;
+  }
+  
+  .indicator {
+    width: 6px;
+    height: 6px;
+  }
+}
+
+/* Animation for message transitions */
+.jumbotron-message {
+  transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+/* Alternative animation for shorter messages */
+.scrolling-text.short-message {
+  animation: fade-slide 8s ease-in-out infinite;
+  padding-left: 0;
+  text-align: center;
+  width: 100%;
+}
+
+@keyframes fade-slide {
+  0%, 15% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  85%, 100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
