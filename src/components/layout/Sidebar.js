@@ -87,6 +87,15 @@ const Sidebar = () => {
               <i className="bi bi-file-text"></i>
               Release Guidelines
             </NavLink>
+            <NavLink
+              to="/wiki"
+              className={({ isActive }) =>
+                isActive ? "nav-item active" : "nav-item"
+              }
+            >
+              <i className="bi bi-journal-text"></i>
+              Wiki
+            </NavLink>
           </nav>
         </div>
 

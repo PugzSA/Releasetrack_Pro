@@ -14,6 +14,7 @@ import ReleaseDates from "./components/ReleaseDates";
 import ReleaseGuidelines from "./components/ReleaseGuidelines";
 import Settings from "./components/settings/Settings";
 import EmailTest from "./components/EmailTest";
+import Wiki from "./components/wiki/Wiki";
 import { useApp } from "./context/AppContext";
 import Dashboard from "./components/Dashboard";
 import NewTicket from "./components/NewTicket";
@@ -37,6 +38,7 @@ const MainApp = () => {
             <Route path="/release-strategy" element={<ReleaseStrategy />} />
             <Route path="/release-dates" element={<ReleaseDates />} />
             <Route path="/release-guidelines" element={<ReleaseGuidelines />} />
+            <Route path="/wiki" element={<Wiki />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/tickets/new" element={<NewTicket />} />
             <Route path="/email-test" element={<EmailTest />} />
