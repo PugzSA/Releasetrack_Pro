@@ -438,7 +438,7 @@ const Tickets = () => {
 
             {/* Sort Button */}
             <button
-              className="btn btn-outline-secondary me-3"
+              className="btn btn-outline-secondary me-2"
               onClick={handleSortToggle}
               title={`Sort by created date ${
                 sortOrder === "desc" ? "ascending" : "descending"
@@ -454,7 +454,7 @@ const Tickets = () => {
 
             {/* Status Filter Toggle (Lock/Unlock) */}
             <button
-              className="btn btn-outline-secondary me-3"
+              className="btn btn-outline-secondary me-2"
               onClick={handleStatusFilterToggle}
               title={
                 statusFilter === "closed"
@@ -471,7 +471,7 @@ const Tickets = () => {
             </button>
 
             {/* View Toggle */}
-            <div className="view-toggle-modern me-3">
+            <div className="view-toggle-modern">
               <button
                 onClick={() => setViewMode("list")}
                 className={`btn-toggle ${viewMode === "list" ? "active" : ""}`}
@@ -490,14 +490,14 @@ const Tickets = () => {
 
             {/* Search and Filter Icons */}
             <button
-              className="btn btn-icon me-2"
+              className="btn btn-icon header-icon-spacing header-search-icon"
               onClick={() => setShowSearchModal(true)}
               title="Search tickets"
             >
               <Search size={20} />
             </button>
             <button
-              className="btn btn-icon position-relative"
+              className="btn btn-icon header-filter-icon-spacing position-relative"
               onClick={() => setShowFilterModal(true)}
               title="Filter tickets"
             >

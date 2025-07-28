@@ -764,7 +764,7 @@ const Releases = () => {
 
             {/* Sort Button */}
             <button
-              className="btn btn-outline-secondary me-3"
+              className="btn btn-outline-secondary me-2"
               onClick={handleSortToggle}
               title={`Sort by target date ${
                 sortOrder === "desc" ? "ascending" : "descending"
@@ -779,7 +779,7 @@ const Releases = () => {
             </button>
 
             {/* View Toggle */}
-            <div className="view-toggle-modern me-3">
+            <div className="view-toggle-modern">
               <button
                 onClick={() => setViewMode("list")}
                 className={`btn-toggle ${viewMode === "list" ? "active" : ""}`}
@@ -798,14 +798,14 @@ const Releases = () => {
 
             {/* Search and Filter Icons */}
             <button
-              className="btn btn-icon me-2"
+              className="btn btn-icon header-icon-spacing header-search-icon"
               onClick={() => setShowSearchModal(true)}
               title="Search releases"
             >
               <Search size={20} />
             </button>
             <button
-              className="btn btn-icon position-relative"
+              className="btn btn-icon header-filter-icon-spacing position-relative"
               onClick={() => setShowFilterModal(true)}
               title="Filter releases"
             >

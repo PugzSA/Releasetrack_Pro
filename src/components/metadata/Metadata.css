@@ -26,15 +26,18 @@
 
 .btn-icon {
   background: none;
-  border: none;
+  border: 1px solid #dee2e6;
   padding: 0.5rem;
   border-radius: 0.5rem;
   color: #6c757d;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
+  width: auto;
+  min-width: 40px;
 }
 
 .btn-icon:hover {
   background-color: #f8f9fa;
+  border-color: #adb5bd;
 }
 
 /* View Toggle */
@@ -67,6 +70,35 @@
   background-color: white;
   color: #0d6efd;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Consistent header spacing */
+.header-icon-spacing {
+  margin-left: 0.75rem !important;
+}
+
+/* Compact icon-only buttons - Override Bootstrap .btn styles */
+.btn.header-search-icon,
+.btn.header-filter-icon-spacing {
+  padding: 0.5rem !important;
+  width: 40px !important;
+  height: 40px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin-left: 0.5rem !important;
+  border: 1px solid #dee2e6 !important;
+  background: none !important;
+  border-radius: 0.5rem !important;
+  color: #6c757d !important;
+  transition: all 0.2s !important;
+}
+
+.btn.header-search-icon:hover,
+.btn.header-filter-icon-spacing:hover {
+  background-color: #f8f9fa !important;
+  border-color: #adb5bd !important;
+  color: #6c757d !important;
 }
 
 /* Content Area */
