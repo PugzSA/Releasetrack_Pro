@@ -21,8 +21,8 @@ const NewTicketModal = ({
     title: "",
     requester: "", // This will store the requester_id (user ID)
     assignee: "", // This will store the assignee_id (user ID)
-    supportArea: "CRM",
-    type: "Issue",
+    supportArea: "", // No default value - user must select
+    type: "", // No default value - user must select
     priority: "Medium",
     status: "Backlog",
     release_id: "", // This will store the release ID
@@ -91,9 +91,38 @@ const NewTicketModal = ({
   };
 
   const handleSubmit = async () => {
-    // Basic validation
+    // Required field validation
+    const requiredFields = [];
+
     if (!formData.title.trim()) {
-      alert("Please enter a ticket title");
+      requiredFields.push("Title");
+    }
+    if (!formData.requester) {
+      requiredFields.push("Requester");
+    }
+    if (!formData.assignee) {
+      requiredFields.push("Assignee");
+    }
+    if (!formData.supportArea) {
+      requiredFields.push("Support Area");
+    }
+    if (!formData.type) {
+      requiredFields.push("Type");
+    }
+    if (!formData.priority) {
+      requiredFields.push("Priority");
+    }
+    if (!formData.description.trim()) {
+      requiredFields.push("Description");
+    }
+
+    if (requiredFields.length > 0) {
+      const message = `Please complete all required fields: ${requiredFields.join(
+        ", "
+      )}`;
+      if (showToast) {
+        showToast(message, "danger");
+      }
       return;
     }
 
@@ -154,7 +183,7 @@ const NewTicketModal = ({
               <input
                 type="text"
                 className="ticket-modal-title-input"
-                placeholder="Enter ticket title..."
+                placeholder="Enter ticket title... *"
                 value={formData.title}
                 onChange={(e) => handleInputChange("title", e.target.value)}
                 style={{ minHeight: "40px", resize: "none" }}
@@ -169,7 +198,9 @@ const NewTicketModal = ({
           <div className="row mb-4">
             <div className="col-md-6">
               <div className="ticket-modal-field">
-                <label className="ticket-modal-label">Requester:</label>
+                <label className="ticket-modal-label">
+                  Requester: <span style={{ color: "red" }}>*</span>
+                </label>
                 <div className="d-flex align-items-center">
                   <User size={16} className="me-2 text-muted" />
                   <select
@@ -179,7 +210,9 @@ const NewTicketModal = ({
                       handleInputChange("requester", e.target.value)
                     }
                   >
-                    <option value="">Select Requester</option>
+                    <option value="" disabled style={{ fontStyle: "italic" }}>
+                      Please select...
+                    </option>
                     {users.map((user) => (
                       <option key={user.id} value={user.id}>
                         {user.firstName} {user.lastName}
@@ -191,7 +224,9 @@ const NewTicketModal = ({
             </div>
             <div className="col-md-6">
               <div className="ticket-modal-field">
-                <label className="ticket-modal-label">Assignee:</label>
+                <label className="ticket-modal-label">
+                  Assignee: <span style={{ color: "red" }}>*</span>
+                </label>
                 <div className="d-flex align-items-center">
                   <User size={16} className="me-2 text-muted" />
                   <select
@@ -201,7 +236,9 @@ const NewTicketModal = ({
                       handleInputChange("assignee", e.target.value)
                     }
                   >
-                    <option value="">Unassigned</option>
+                    <option value="" disabled style={{ fontStyle: "italic" }}>
+                      Please select...
+                    </option>
                     {users.map((user) => (
                       <option key={user.id} value={user.id}>
                         {user.firstName} {user.lastName}
@@ -217,7 +254,9 @@ const NewTicketModal = ({
           <div className="row mb-4">
             <div className="col-md-6">
               <div className="ticket-modal-field">
-                <label className="ticket-modal-label">Support Area:</label>
+                <label className="ticket-modal-label">
+                  Support Area: <span style={{ color: "red" }}>*</span>
+                </label>
                 <select
                   className="ticket-modal-select"
                   value={formData.supportArea}
@@ -225,6 +264,9 @@ const NewTicketModal = ({
                     handleInputChange("supportArea", e.target.value)
                   }
                 >
+                  <option value="" disabled style={{ fontStyle: "italic" }}>
+                    Please select...
+                  </option>
                   <option value="CRM">CRM</option>
                   <option value="Customer Support">Customer Support</option>
                   <option value="Marketing">Marketing</option>
@@ -233,12 +275,17 @@ const NewTicketModal = ({
             </div>
             <div className="col-md-6">
               <div className="ticket-modal-field">
-                <label className="ticket-modal-label">Type:</label>
+                <label className="ticket-modal-label">
+                  Type: <span style={{ color: "red" }}>*</span>
+                </label>
                 <select
                   className="ticket-modal-select"
                   value={formData.type}
                   onChange={(e) => handleInputChange("type", e.target.value)}
                 >
+                  <option value="" disabled style={{ fontStyle: "italic" }}>
+                    Please select...
+                  </option>
                   <option value="Enhancement">Enhancement</option>
                   <option value="Issue">Issue</option>
                   <option value="New Feature">New Feature</option>
@@ -252,7 +299,9 @@ const NewTicketModal = ({
           <div className="row mb-4">
             <div className="col-md-6">
               <div className="ticket-modal-field">
-                <label className="ticket-modal-label">Priority:</label>
+                <label className="ticket-modal-label">
+                  Priority: <span style={{ color: "red" }}>*</span>
+                </label>
                 <div className="d-flex align-items-center">
                   <div
                     className={`priority-dot me-2 priority-${formData.priority.toLowerCase()}`}
@@ -330,11 +379,13 @@ const NewTicketModal = ({
 
           {/* Description */}
           <div className="ticket-modal-field mb-4">
-            <label className="ticket-modal-label">Description:</label>
+            <label className="ticket-modal-label">
+              Description: <span style={{ color: "red" }}>*</span>
+            </label>
             <textarea
               className="ticket-modal-textarea"
               rows="4"
-              placeholder="Enter ticket description..."
+              placeholder="Enter ticket description... *"
               value={formData.description}
               onChange={(e) => handleInputChange("description", e.target.value)}
             />

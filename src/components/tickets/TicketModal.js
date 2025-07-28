@@ -62,6 +62,9 @@ const TicketModal = ({
     testNotes: ticket.testNotes || "",
   });
 
+  // Loading state for update button
+  const [isUpdating, setIsUpdating] = useState(false);
+
   // Ref and state for modern scrollbar behavior
   const modalRef = useRef(null);
   const [isScrolling, setIsScrolling] = useState(false);
@@ -175,6 +178,7 @@ const TicketModal = ({
   };
 
   const handleSubmit = async () => {
+    setIsUpdating(true);
     try {
       // Map form data to database field names with proper type conversion
       const updateData = {
@@ -206,16 +210,16 @@ const TicketModal = ({
         showToast("Ticket updated successfully!", "success");
       }
 
-      // Auto-close the modal after a short delay to show the toast
-      setTimeout(() => {
-        onClose();
-      }, 1500); // Close after 1.5 seconds to give time to see the toast
+      // Close the modal immediately after successful update
+      onClose();
     } catch (error) {
       console.error("Error updating ticket:", error);
       // Show error toast using parent component's toast system
       if (showToast) {
         showToast("Error updating ticket. Please try again.", "danger");
       }
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -252,6 +256,16 @@ const TicketModal = ({
         className={`ticket-modal-modern ${isScrolling ? "scrolling" : ""}`}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Full-screen loading overlay */}
+        {isUpdating && (
+          <div className="ticket-modal-loading-overlay">
+            <div className="ticket-modal-loading-spinner">
+              <div className="loader"></div>
+              <p className="loading-text">Updating ticket...</p>
+            </div>
+          </div>
+        )}
+
         <button onClick={onClose} className="ticket-modal-close-btn">
           <X size={20} />
         </button>
@@ -331,7 +345,13 @@ const TicketModal = ({
                           handleInputChange("requester_id", e.target.value)
                         }
                       >
-                        <option value="">Select Requester</option>
+                        <option
+                          value=""
+                          disabled
+                          style={{ fontStyle: "italic" }}
+                        >
+                          Please select...
+                        </option>
                         {users.map((user) => (
                           <option key={user.id} value={user.id}>
                             {user.firstName} {user.lastName}
@@ -353,7 +373,13 @@ const TicketModal = ({
                           handleInputChange("assignee_id", e.target.value)
                         }
                       >
-                        <option value="">Unassigned</option>
+                        <option
+                          value=""
+                          disabled
+                          style={{ fontStyle: "italic" }}
+                        >
+                          Please select...
+                        </option>
                         {users.map((user) => (
                           <option key={user.id} value={user.id}>
                             {user.firstName} {user.lastName}
@@ -661,11 +687,31 @@ const TicketModal = ({
 
         {/* Footer */}
         <div className="ticket-modal-footer-modern">
-          <button className="btn btn-outline-secondary me-2" onClick={onClose}>
-            Close
+          <button
+            className="btn btn-outline-secondary me-2"
+            onClick={onClose}
+            disabled={isUpdating}
+            style={{
+              position: "relative",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <span>Close</span>
           </button>
-          <button className="btn btn-primary" onClick={handleSubmit}>
-            Update
+          <button
+            className="btn btn-primary"
+            onClick={handleSubmit}
+            disabled={isUpdating}
+            style={{
+              position: "relative",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <span>Update</span>
           </button>
         </div>
       </div>

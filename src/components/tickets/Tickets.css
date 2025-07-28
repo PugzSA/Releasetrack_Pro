@@ -149,6 +149,62 @@
   }
 }
 
+/* Ticket Modal Loading Overlay */
+.ticket-modal-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.95);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  border-radius: 12px;
+}
+
+.ticket-modal-loading-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.ticket-modal-loading-spinner .loader {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+.ticket-modal-loading-spinner .loading-text {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  color: #374151;
+}
+
+/* Prevent any spinners from appearing in modal footer buttons */
+.ticket-modal-footer-modern .btn::before,
+.ticket-modal-footer-modern .btn::after {
+  display: none !important;
+  content: none !important;
+}
+
+.ticket-modal-footer-modern .btn .spinner-border,
+.ticket-modal-footer-modern .btn .spinner-border-sm {
+  display: none !important;
+}
+
+.ticket-modal-footer-modern .btn:disabled::before,
+.ticket-modal-footer-modern .btn:disabled::after {
+  display: none !important;
+  content: none !important;
+}
+
 /* Modern Tickets Page Styling */
 .tickets-page-modern {
   min-height: 100vh;

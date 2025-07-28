@@ -60,15 +60,7 @@ const Sidebar = () => {
               <i className="bi bi-bar-chart"></i>
               Reports
             </NavLink>
-            <NavLink
-              to="/release-strategy"
-              className={({ isActive }) =>
-                isActive ? "nav-item active" : "nav-item"
-              }
-            >
-              <i className="bi bi-diagram-3"></i>
-              Release Strategy
-            </NavLink>
+
             <NavLink
               to="/release-dates"
               className={({ isActive }) =>

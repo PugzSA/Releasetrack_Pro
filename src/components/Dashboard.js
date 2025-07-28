@@ -11,7 +11,14 @@ import NotificationToast from "./common/NotificationToast";
 import { useApp } from "../context/AppContext";
 
 const Dashboard = () => {
-  const { supabase, users, releases, refreshData, updateRelease } = useApp();
+  const {
+    supabase,
+    users,
+    releases,
+    refreshData,
+    updateRelease,
+    updateTicket,
+  } = useApp();
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [selectedRelease, setSelectedRelease] = useState(null);
   const [notification, setNotification] = useState({
@@ -36,6 +43,14 @@ const Dashboard = () => {
     },
   });
   const [metricsLoading, setMetricsLoading] = useState(true);
+
+  // Reference to the RecentTicketsTable refresh function
+  const [refreshRecentTickets, setRefreshRecentTickets] = useState(null);
+
+  // Handle refresh callback setting
+  const handleRefreshCallback = (callback) => {
+    setRefreshRecentTickets(() => callback);
+  };
 
   // Fetch system settings to determine if Supabase test and jumbotron should be shown
   useEffect(() => {
@@ -113,87 +128,100 @@ const Dashboard = () => {
   }, [supabase]);
 
   // Fetch ticket metrics
-  useEffect(() => {
-    const fetchTicketMetrics = async () => {
-      if (!supabase) return;
+  // Extract fetchTicketMetrics as a separate function so it can be called after updates
+  const fetchTicketMetrics = async () => {
+    if (!supabase) return;
 
-      try {
-        setMetricsLoading(true);
+    try {
+      setMetricsLoading(true);
 
-        // Get current month date range
-        const now = new Date();
-        const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-        const lastDayOfMonth = new Date(
-          now.getFullYear(),
-          now.getMonth() + 1,
-          0
-        );
+      // Get current month date range
+      const now = new Date();
+      const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
-        const firstDayStr = firstDayOfMonth.toISOString().split("T")[0];
-        const lastDayStr = lastDayOfMonth.toISOString().split("T")[0];
+      const firstDayStr = firstDayOfMonth.toISOString().split("T")[0];
+      const lastDayStr = lastDayOfMonth.toISOString().split("T")[0];
 
-        // Fetch all tickets for calculations
-        const { data: allTickets, error: ticketsError } = await supabase
-          .from("tickets")
-          .select("*");
+      // Fetch all tickets for calculations
+      const { data: allTickets, error: ticketsError } = await supabase
+        .from("tickets")
+        .select("*");
 
-        if (ticketsError) {
-          throw ticketsError;
+      if (ticketsError) {
+        throw ticketsError;
+      }
+
+      const tickets = allTickets || [];
+
+      // Calculate This Month metrics
+      const thisMonthLogged = tickets.filter((ticket) => {
+        const createdDate = new Date(ticket.created_at)
+          .toISOString()
+          .split("T")[0];
+        return createdDate >= firstDayStr && createdDate <= lastDayStr;
+      }).length;
+
+      const thisMonthClosed = tickets.filter((ticket) => {
+        // Only count tickets that have a closed_date within this month
+        if (!ticket.closed_date) return false;
+
+        const closedDate = new Date(ticket.closed_date)
+          .toISOString()
+          .split("T")[0];
+        const isInThisMonth =
+          closedDate >= firstDayStr && closedDate <= lastDayStr;
+
+        if (isInThisMonth) {
+          console.log(
+            `Ticket ${ticket.id} closed this month: ${closedDate} (${ticket.status})`
+          );
         }
 
-        const tickets = allTickets || [];
+        return isInThisMonth;
+      }).length;
 
-        // Calculate This Month metrics
-        const thisMonthLogged = tickets.filter((ticket) => {
-          const createdDate = new Date(ticket.created_at)
-            .toISOString()
-            .split("T")[0];
-          return createdDate >= firstDayStr && createdDate <= lastDayStr;
-        }).length;
+      const thisMonthInTesting = tickets.filter((ticket) => {
+        const status = ticket.status;
+        return status === "In Testing - Dev" || status === "In Testing - UAT";
+      }).length;
 
-        const thisMonthClosed = tickets.filter((ticket) => {
-          const updatedDate = new Date(ticket.updated_at)
-            .toISOString()
-            .split("T")[0];
-          const status = ticket.status;
-          return (
-            updatedDate >= firstDayStr &&
-            updatedDate <= lastDayStr &&
-            (status === "Released" || status === "Cancelled")
-          );
-        }).length;
+      // Calculate All Time metrics
+      const allTimeLogged = tickets.length;
 
-        const thisMonthInTesting = tickets.filter((ticket) => {
-          const status = ticket.status;
-          return status === "In Testing - Dev" || status === "In Testing - UAT";
-        }).length;
+      const allTimeClosed = tickets.filter((ticket) => {
+        // Count all tickets that have a closed_date (regardless of when)
+        const hasClosed =
+          ticket.closed_date !== null && ticket.closed_date !== undefined;
+        return hasClosed;
+      }).length;
 
-        // Calculate All Time metrics
-        const allTimeLogged = tickets.length;
+      console.log(
+        `Dashboard Metrics - This Month: ${firstDayStr} to ${lastDayStr}`
+      );
+      console.log(
+        `This Month Closed: ${thisMonthClosed}, All Time Closed: ${allTimeClosed}`
+      );
 
-        const allTimeClosed = tickets.filter((ticket) => {
-          const status = ticket.status;
-          return status === "Released" || status === "Cancelled";
-        }).length;
+      setTicketMetrics({
+        thisMonth: {
+          logged: thisMonthLogged,
+          closed: thisMonthClosed,
+          inTesting: thisMonthInTesting,
+        },
+        allTime: {
+          logged: allTimeLogged,
+          closed: allTimeClosed,
+        },
+      });
+    } catch (err) {
+      console.error("Error fetching ticket metrics:", err);
+    } finally {
+      setMetricsLoading(false);
+    }
+  };
 
-        setTicketMetrics({
-          thisMonth: {
-            logged: thisMonthLogged,
-            closed: thisMonthClosed,
-            inTesting: thisMonthInTesting,
-          },
-          allTime: {
-            logged: allTimeLogged,
-            closed: allTimeClosed,
-          },
-        });
-      } catch (err) {
-        console.error("Error fetching ticket metrics:", err);
-      } finally {
-        setMetricsLoading(false);
-      }
-    };
-
+  useEffect(() => {
     if (supabase) {
       fetchTicketMetrics();
     }
@@ -205,6 +233,11 @@ const Dashboard = () => {
       message,
       variant,
     });
+
+    // Auto-clear the notification after 3 seconds as a fallback
+    setTimeout(() => {
+      setNotification((prev) => ({ ...prev, show: false }));
+    }, 3000);
   };
 
   const handleTicketClick = (ticket) => {
@@ -266,26 +299,24 @@ const Dashboard = () => {
 
   const handleUpdateTicket = async (ticketId, updateData) => {
     try {
-      // Update the ticket in the database using the context method
-      const updatedTicket = await supabase
-        .from("tickets")
-        .update(updateData)
-        .eq("id", ticketId)
-        .select()
-        .single();
-
-      if (updatedTicket.error) {
-        throw updatedTicket.error;
-      }
+      // Update the ticket using the proper context method (includes closed_date logic)
+      const updatedTicket = await updateTicket(ticketId, updateData);
 
       // Refresh the data to update all components
       await refreshData();
 
-      // Close the modal and show success message
-      setSelectedTicket(null);
-      showToast("Ticket updated successfully", "success");
+      // Refresh the recent tickets table specifically
+      if (refreshRecentTickets && typeof refreshRecentTickets === "function") {
+        await refreshRecentTickets();
+      }
 
-      return updatedTicket.data;
+      // Refresh the ticket metrics as well
+      await fetchTicketMetrics();
+
+      // Close the modal (success toast is handled by TicketModal)
+      setSelectedTicket(null);
+
+      return updatedTicket;
     } catch (error) {
       console.error("Error updating ticket:", error);
       showToast("Failed to update ticket", "error");
@@ -395,7 +426,10 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <RecentTicketsTable onTicketClick={handleTicketClick} />
+      <RecentTicketsTable
+        onTicketClick={handleTicketClick}
+        onRefreshNeeded={handleRefreshCallback}
+      />
 
       {/* Supabase Connection Test - Conditionally shown based on system setting */}
       {showSupabaseTest && (

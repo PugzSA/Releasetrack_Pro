@@ -9,7 +9,7 @@ import Tickets from "./components/tickets/Tickets";
 import Metadata from "./components/metadata/Metadata";
 import ReleaseDetail from "./components/releases/ReleaseDetail";
 import Reports from "./components/Reports";
-import ReleaseStrategy from "./components/ReleaseStrategy";
+
 import ReleaseDates from "./components/ReleaseDates";
 import ReleaseGuidelines from "./components/ReleaseGuidelines";
 import Settings from "./components/settings/Settings";
@@ -35,7 +35,7 @@ const MainApp = () => {
             <Route path="/tickets" element={<Tickets />} />
             <Route path="/metadata" element={<Metadata />} />
             <Route path="/reports" element={<Reports />} />
-            <Route path="/release-strategy" element={<ReleaseStrategy />} />
+
             <Route path="/release-dates" element={<ReleaseDates />} />
             <Route path="/release-guidelines" element={<ReleaseGuidelines />} />
             <Route path="/wiki" element={<Wiki />} />

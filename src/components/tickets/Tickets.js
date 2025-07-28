@@ -21,6 +21,8 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
+  Lock,
+  LockOpen,
 } from "lucide-react";
 import "./Tickets.css";
 
@@ -66,6 +68,7 @@ const Tickets = () => {
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [sortOrder, setSortOrder] = useState("desc"); // 'desc' for newest first, 'asc' for oldest first
+  const [statusFilter, setStatusFilter] = useState("all"); // 'all', 'open', 'closed'
 
   // Global toast state
   const [notification, setNotification] = useState({
@@ -151,6 +154,13 @@ const Tickets = () => {
         !ticketFilters.tag ||
         (ticket.tags && ticket.tags.includes(ticketFilters.tag));
 
+      // Status filter for lock/unlock functionality
+      const closedStatuses = ["Cancelled", "Released"];
+      const statusFilterMatch =
+        statusFilter === "all" ||
+        (statusFilter === "closed" && closedStatuses.includes(ticket.status)) ||
+        (statusFilter === "open" && !closedStatuses.includes(ticket.status));
+
       return (
         searchTermMatch &&
         typeMatch &&
@@ -161,7 +171,8 @@ const Tickets = () => {
         assignedToMatch &&
         requesterMatch &&
         assigneeMatch &&
-        tagsMatch
+        tagsMatch &&
+        statusFilterMatch
       );
     });
 
@@ -176,7 +187,7 @@ const Tickets = () => {
         return dateA - dateB; // Oldest first
       }
     });
-  }, [tickets, ticketFilters, sortOrder]);
+  }, [tickets, ticketFilters, sortOrder, statusFilter]);
 
   const handleTicketClick = (ticket) => {
     setSelectedTicket(ticket);
@@ -225,6 +236,17 @@ const Tickets = () => {
   // Handle sort toggle
   const handleSortToggle = () => {
     setSortOrder((prevOrder) => (prevOrder === "desc" ? "asc" : "desc"));
+  };
+
+  // Handle status filter toggle (lock/unlock)
+  const handleStatusFilterToggle = () => {
+    setStatusFilter((prevFilter) => {
+      if (prevFilter === "all" || prevFilter === "open") {
+        return "closed";
+      } else {
+        return "open";
+      }
+    });
   };
 
   const handleCreateTicket = async (ticketData) => {
@@ -428,6 +450,24 @@ const Tickets = () => {
                 <ArrowUp size={16} className="me-2" />
               )}
               {sortOrder === "desc" ? "Newest First" : "Oldest First"}
+            </button>
+
+            {/* Status Filter Toggle (Lock/Unlock) */}
+            <button
+              className="btn btn-outline-secondary me-3"
+              onClick={handleStatusFilterToggle}
+              title={
+                statusFilter === "closed"
+                  ? "Showing closed tickets only. Click to show open tickets."
+                  : "Showing open tickets only. Click to show closed tickets."
+              }
+            >
+              {statusFilter === "closed" ? (
+                <Lock size={16} className="me-2" />
+              ) : (
+                <LockOpen size={16} className="me-2" />
+              )}
+              {statusFilter === "closed" ? "Closed" : "Open"}
             </button>
 
             {/* View Toggle */}

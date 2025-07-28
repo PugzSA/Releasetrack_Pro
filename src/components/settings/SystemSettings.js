@@ -199,7 +199,17 @@ const SystemSettings = () => {
   }
 
   return (
-    <Card>
+    <Card style={{ position: "relative" }}>
+      {/* Full-screen loading overlay */}
+      {saving && (
+        <div className="ticket-modal-loading-overlay">
+          <div className="ticket-modal-loading-spinner">
+            <div className="loader"></div>
+            <p className="loading-text">Saving settings...</p>
+          </div>
+        </div>
+      )}
+
       <Card.Header>
         <h5 className="mb-0">🔧 System Email Settings</h5>
         <small className="text-muted">
@@ -346,21 +356,7 @@ const SystemSettings = () => {
 
           <div className="d-flex justify-content-end mt-4">
             <Button variant="primary" onClick={handleSave} disabled={saving}>
-              {saving ? (
-                <>
-                  <Spinner
-                    as="span"
-                    animation="border"
-                    size="sm"
-                    role="status"
-                    aria-hidden="true"
-                    className="me-2"
-                  />
-                  Saving...
-                </>
-              ) : (
-                "Save System Settings"
-              )}
+              Save System Settings
             </Button>
           </div>
         </Form>

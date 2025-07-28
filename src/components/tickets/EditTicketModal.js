@@ -129,15 +129,11 @@ const EditTicketModal = ({ show, handleClose, ticket, onTicketUpdate }) => {
       }
 
       const updatedTicket = await updateTicket(ticket.id, formattedData);
-      setSuccess(true);
 
       // Call the onTicketUpdate callback if provided
       if (onTicketUpdate && typeof onTicketUpdate === "function") {
         onTicketUpdate({ ...ticket, ...formattedData });
       }
-
-      // Track if any notifications were sent
-      let notificationSent = false;
 
       // Show notification if status was changed
       if (ticket.status !== formattedData.status) {
@@ -146,16 +142,11 @@ const EditTicketModal = ({ show, handleClose, ticket, onTicketUpdate }) => {
           message: `Email notification sent for ticket status change: ${ticket.status} → ${formattedData.status}`,
           variant: "info",
         });
-        notificationSent = true;
       }
 
-      // Note: Email notifications are now handled automatically by the SupabaseDataService
-
-      // Close modal after short delay to show success message
-      setTimeout(() => {
-        handleClose();
-        setSuccess(false);
-      }, 1500);
+      // Close modal immediately after successful update
+      handleClose();
+      setSuccess(false);
     } catch (err) {
       console.error("Error updating ticket:", err);
       setError(err.message || "Failed to update ticket. Please try again.");
@@ -179,7 +170,17 @@ const EditTicketModal = ({ show, handleClose, ticket, onTicketUpdate }) => {
         <div
           className="ticket-modal-modern"
           onClick={(e) => e.stopPropagation()}
+          style={{ position: "relative" }}
         >
+          {/* Full-screen loading overlay */}
+          {loading && (
+            <div className="ticket-modal-loading-overlay">
+              <div className="ticket-modal-loading-spinner">
+                <div className="loader"></div>
+                <p className="loading-text">Updating ticket...</p>
+              </div>
+            </div>
+          )}
           <button onClick={handleClose} className="ticket-modal-close-btn">
             <X size={20} />
           </button>
@@ -250,7 +251,13 @@ const EditTicketModal = ({ show, handleClose, ticket, onTicketUpdate }) => {
                         value={formData.requester_id || ""}
                         onChange={handleChange}
                       >
-                        <option value="">Select Requester</option>
+                        <option
+                          value=""
+                          disabled
+                          style={{ fontStyle: "italic" }}
+                        >
+                          Please select...
+                        </option>
                         {users.map((user) => (
                           <option key={user.id} value={user.id}>
                             {user.firstName} {user.lastName}
@@ -275,7 +282,13 @@ const EditTicketModal = ({ show, handleClose, ticket, onTicketUpdate }) => {
                         value={formData.assignee_id || ""}
                         onChange={handleChange}
                       >
-                        <option value="">Select Assignee</option>
+                        <option
+                          value=""
+                          disabled
+                          style={{ fontStyle: "italic" }}
+                        >
+                          Please select...
+                        </option>
                         {users.map((user) => (
                           <option key={user.id} value={user.id}>
                             {user.firstName} {user.lastName}
@@ -463,7 +476,7 @@ const EditTicketModal = ({ show, handleClose, ticket, onTicketUpdate }) => {
               onClick={handleSubmit}
               disabled={loading || success}
             >
-              {loading ? "Updating..." : "Update Ticket"}
+              Update Ticket
             </button>
           </div>
         </div>

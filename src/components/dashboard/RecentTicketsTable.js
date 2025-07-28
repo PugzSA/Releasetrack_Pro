@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { ChevronUp, ChevronDown, ExternalLink } from "lucide-react";
 import { useApp } from "../../context/AppContext";
+import "../reports/ReportTable.css"; // Import badge styles for consistent status colors
 import "./RecentTicketsTable.css";
 
-const RecentTicketsTable = ({ onTicketClick }) => {
+const RecentTicketsTable = ({ onTicketClick, onRefreshNeeded }) => {
   const { supabase } = useApp();
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -12,10 +13,6 @@ const RecentTicketsTable = ({ onTicketClick }) => {
     key: "last_activity",
     direction: "desc",
   });
-
-  useEffect(() => {
-    fetchRecentTickets();
-  }, [supabase]);
 
   const fetchRecentTickets = async () => {
     try {
@@ -93,6 +90,18 @@ const RecentTicketsTable = ({ onTicketClick }) => {
       setLoading(false);
     }
   };
+
+  // Initial fetch on component mount
+  useEffect(() => {
+    fetchRecentTickets();
+  }, [supabase]);
+
+  // Expose the refresh function to parent component
+  useEffect(() => {
+    if (onRefreshNeeded) {
+      onRefreshNeeded(fetchRecentTickets);
+    }
+  }, [onRefreshNeeded, fetchRecentTickets]);
 
   // Sort tickets
   const sortedTickets = useMemo(() => {
@@ -180,14 +189,34 @@ const RecentTicketsTable = ({ onTicketClick }) => {
     switch (status?.toLowerCase()) {
       case "backlog":
         return "badge-backlog";
-      case "in technical design":
-        return "badge-in-technical-design";
-      case "in development":
-        return "badge-in-development";
+      case "cancelled":
+        return "badge-cancelled";
       case "requirements gathering":
-        return "badge-requirements-gathering";
+        return "badge-requirements";
+      case "in technical design":
+        return "badge-design";
+      case "in development":
+        return "badge-development";
+      case "blocked - user":
+        return "badge-blocked-user";
+      case "blocked - dev":
+        return "badge-blocked-dev";
+      case "in testing - dev":
+        return "badge-testing-dev";
+      case "in testing - uat":
+        return "badge-testing-uat";
+      case "ready for release":
+        return "badge-ready";
       case "released":
         return "badge-released";
+      case "in progress":
+        return "badge-progress";
+      case "in review":
+        return "badge-review";
+      case "done":
+        return "badge-done";
+      case "testing":
+        return "badge-testing";
       case "closed":
         return "badge-closed";
       default:

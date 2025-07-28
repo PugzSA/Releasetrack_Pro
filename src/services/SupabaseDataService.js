@@ -254,10 +254,39 @@ class SupabaseDataService {
         throw fetchError;
       }
 
+      // Handle closed_date logic
+      const closedStatuses = ["Released", "Cancelled"];
+      const updatedTicketData = { ...ticketData };
+
+      // If status is changing to a closed status, set closed_date
+      if (
+        ticketData.status &&
+        closedStatuses.includes(ticketData.status) &&
+        originalTicket.status !== ticketData.status &&
+        !closedStatuses.includes(originalTicket.status)
+      ) {
+        updatedTicketData.closed_date = new Date().toISOString();
+        console.log(
+          `Setting closed_date for ticket ${id} due to status change to ${ticketData.status}`
+        );
+      }
+
+      // If status is changing from a closed status to an open status, clear closed_date
+      if (
+        ticketData.status &&
+        !closedStatuses.includes(ticketData.status) &&
+        closedStatuses.includes(originalTicket.status)
+      ) {
+        updatedTicketData.closed_date = null;
+        console.log(
+          `Clearing closed_date for ticket ${id} due to status change from ${originalTicket.status} to ${ticketData.status}`
+        );
+      }
+
       // Update the ticket
       const { data, error } = await supabase
         .from("tickets")
-        .update(ticketData)
+        .update(updatedTicketData)
         .eq("id", id)
         .select()
         .single();

@@ -10,7 +10,7 @@ import ReportDataService from "../services/ReportDataService";
 import "./Reports.css";
 
 const Reports = () => {
-  const { supabase } = useApp();
+  const { supabase, updateTicket } = useApp();
   const [reportDataService] = useState(() => new ReportDataService(supabase));
 
   // State management
@@ -197,10 +197,8 @@ const Reports = () => {
 
   const handleUpdateTicket = async (ticketId, updateData) => {
     try {
-      const updatedTicket = await reportDataService.updateTicket(
-        ticketId,
-        updateData
-      );
+      // Use the proper context method (includes closed_date logic)
+      const updatedTicket = await updateTicket(ticketId, updateData);
 
       // Update the ticket in the current tickets list
       setTickets((prevTickets) =>
